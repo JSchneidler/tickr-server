@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
 import {
   createUser,
@@ -8,7 +8,7 @@ import {
   getUser,
   updateUser,
   deleteUser,
-} from "db/users";
+} from "../db/users";
 
 import api_keys from "./api_keys";
 import holdings from "./holdings";

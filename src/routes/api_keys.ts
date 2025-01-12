@@ -1,8 +1,13 @@
 import { Type } from "@sinclair/typebox";
 
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
-import { createApiKey, getApiKeys, getApiKey, revokeApiKey } from "db/api_keys";
+import {
+  createApiKey,
+  getApiKeys,
+  getApiKey,
+  revokeApiKey,
+} from "../db/api_keys";
 
 export default function (f: FastifyTypeBox) {
   f.post(

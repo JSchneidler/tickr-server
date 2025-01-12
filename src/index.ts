@@ -6,7 +6,7 @@ import {
   TypeBoxValidatorCompiler,
 } from "@fastify/type-provider-typebox";
 
-import routes from "routes";
+import routes from "./routes";
 
 const f = fastify({
   logger: true,

@@ -1,8 +1,8 @@
 import { Type } from "@sinclair/typebox";
 
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
-import { banUser, getHoldingsForUser } from "db/admin";
+import { banUser, getHoldingsForUser } from "../db/admin";
 
 export default function (f: FastifyTypeBox) {
   f.get(

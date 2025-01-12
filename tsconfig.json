@@ -5,10 +5,6 @@
   "exclude": ["node_modules"],
 
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "src/*": ["src/*"]
-    },
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,

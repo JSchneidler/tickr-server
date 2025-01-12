@@ -1,12 +1,13 @@
 import dotenv from "dotenv";
-import { z } from "zod";
+import { Type } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
 
 dotenv.config();
 
-const envSchema = z.object({
-  FINNHUB_API_KEY: z.string(),
+const envSchema = Type.Object({
+  FINNHUB_API_KEY: Type.String(),
 });
 
-const env = envSchema.parse(process.env);
+const env = Value.Parse(envSchema, process.env);
 
 export default env;

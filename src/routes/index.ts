@@ -1,4 +1,4 @@
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
 import admin from "./admin";
 import orders from "./orders";

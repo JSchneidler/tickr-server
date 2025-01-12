@@ -1,8 +1,8 @@
 import { Type } from "@sinclair/typebox";
 
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
-import { getHoldings, getHolding } from "db/holdings";
+import { getHoldings, getHolding } from "../db/holdings";
 
 export default function (f: FastifyTypeBox) {
   f.get("/", () => getHoldings());

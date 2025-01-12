@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
-import { FastifyTypeBox } from "fastify-typebox";
+import { FastifyTypeBox } from "../fastify-typebox";
 
 import {
   createOrder,
@@ -8,7 +8,7 @@ import {
   getOrder,
   updateOrder,
   deleteOrder,
-} from "db/orders";
+} from "../db/orders";
 
 export default function (f: FastifyTypeBox) {
   f.post(
