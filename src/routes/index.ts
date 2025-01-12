@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 
-export default async function (fastify: FastifyInstance, opts) {
-  fastify.get("/", async (req, res) => {
+export default function (fastify: FastifyInstance) {
+  fastify.get("/", () => {
     return "Welcome to the API!";
   });
 }
