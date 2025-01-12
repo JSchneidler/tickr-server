@@ -23,7 +23,6 @@ enum OrderType {
 enum AdminActionType {
   VIEW_USER_HOLDINGS
   BAN_USER
-  TIMEOUT_USER
 }
 
 model User {
@@ -48,7 +47,8 @@ model User {
 }
 
 model ApiKey {
-  id Int @id @default(autoincrement())
+  id   Int    @id @default(autoincrement())
+  name String
 
   token_digest String
 
