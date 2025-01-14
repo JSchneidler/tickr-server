@@ -19,7 +19,8 @@ export async function updateOrder(id: number, data: Prisma.OrderUpdateInput) {
 }
 
 export async function deleteOrder(id: number) {
-  return await db.order.delete({ where: { id } });
+  await db.order.delete({ where: { id } });
+  return id;
 }
 
 export default {

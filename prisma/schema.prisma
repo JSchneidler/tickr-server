@@ -55,8 +55,8 @@ model ApiKey {
   User   User @relation(fields: [userId], references: [id])
   userId Int
 
-  createdAt DateTime @default(now())
-  revokedAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
 }
 
 model Holding {
@@ -68,8 +68,9 @@ model Holding {
   User   User @relation(fields: [userId], references: [id])
   userId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Order {

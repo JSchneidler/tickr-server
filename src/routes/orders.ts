@@ -23,6 +23,7 @@ const ORDER_RESPONSE_SCHEMA = Type.Object({
 });
 
 export default function (f: FastifyTypeBox) {
+  // @ts-expect-error Date is assignable to type string
   f.post(
     "/",
     {
@@ -38,9 +39,10 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => createOrder(req.body),
+    (req) => createOrder({ ...req.body, User: {} }),
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/",
     {
@@ -50,19 +52,20 @@ export default function (f: FastifyTypeBox) {
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,
-          200: ORDER_RESPONSE_SCHEMA,
+          200: Type.Array(ORDER_RESPONSE_SCHEMA),
         },
       },
     },
     getOrders,
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/:order_id",
     {
       schema: {
         params: Type.Object({
-          order_id: Type.String(),
+          order_id: Type.Number(),
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,
@@ -73,12 +76,13 @@ export default function (f: FastifyTypeBox) {
     (req) => getOrder(req.params.order_id),
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.put(
     "/:order_id",
     {
       schema: {
         params: Type.Object({
-          order_id: Type.String(),
+          order_id: Type.Number(),
         }),
         body: Type.Object({}),
         response: {
@@ -95,7 +99,7 @@ export default function (f: FastifyTypeBox) {
     {
       schema: {
         params: Type.Object({
-          order_id: Type.String(),
+          order_id: Type.Number(),
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,

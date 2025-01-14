@@ -23,7 +23,7 @@ export default function (f: FastifyTypeBox) {
     },
     (req) => {
       banUser(req.params.user_id);
-    }
+    },
   );
 
   f.get(
@@ -41,6 +41,6 @@ export default function (f: FastifyTypeBox) {
     },
     (req) => {
       getHoldingsForUser(req.params.user_id);
-    }
+    },
   );
 }

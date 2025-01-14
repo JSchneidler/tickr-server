@@ -17,6 +17,7 @@ export const HOLDING_RESPONSE_SCHEMA = Type.Object({
 });
 
 export default function (f: FastifyTypeBox) {
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/",
     {
@@ -30,14 +31,16 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    getHoldings
+    getHoldings,
   );
+
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/:holding_id",
     {
       schema: {
         params: Type.Object({
-          holding_id: Type.String(),
+          holding_id: Type.Number(),
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,
@@ -45,6 +48,6 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => getHolding(req.params.holding_id)
+    (req) => getHolding(req.params.holding_id),
   );
 }

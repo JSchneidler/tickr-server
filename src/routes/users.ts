@@ -31,6 +31,7 @@ export default function (f: FastifyTypeBox) {
   f.register(api_keys, { prefix: "/:user_id/api_keys" });
   f.register(holdings, { prefix: "/:user_id/holdings" });
 
+  // @ts-expect-error Date is assignable to type string
   f.post(
     "/",
     {
@@ -48,6 +49,7 @@ export default function (f: FastifyTypeBox) {
     (req) => createUser({ ...req.body, password_digest: "" }),
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/",
     {
@@ -64,6 +66,7 @@ export default function (f: FastifyTypeBox) {
     getUsers,
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.get(
     "/:user_id",
     {
@@ -80,6 +83,7 @@ export default function (f: FastifyTypeBox) {
     (req) => getUser(req.params.user_id),
   );
 
+  // @ts-expect-error Decimal is assignable to type number
   f.put(
     "/:user_id",
     {

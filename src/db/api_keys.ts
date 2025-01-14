@@ -19,7 +19,8 @@ export async function updateApiKey(id: number, data: Prisma.ApiKeyUpdateInput) {
 }
 
 export async function revokeApiKey(id: number) {
-  return await db.apiKey.delete({ where: { id } });
+  await db.apiKey.delete({ where: { id } });
+  return id;
 }
 
 export default {

@@ -20,6 +20,7 @@ const API_RESPONSE_SCHEMA = Type.Object({
 });
 
 export default function (f: FastifyTypeBox) {
+  // @ts-expect-error Date is assignable to type string
   f.post(
     "/",
     {
@@ -33,9 +34,10 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => createApiKey(req.body)
+    (req) => createApiKey({ ...req.body, token_digest: "", User: {} }),
   );
 
+  // @ts-expect-error Date is assignable to type string
   f.get(
     "/",
     {
@@ -49,9 +51,10 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    getApiKeys
+    getApiKeys,
   );
 
+  // @ts-expect-error Date is assignable to type string
   f.get(
     "/:api_key_id",
     {
@@ -65,7 +68,7 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => getApiKey(req.params.api_key_id)
+    (req) => getApiKey(req.params.api_key_id),
   );
 
   f.delete(
@@ -81,6 +84,6 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => revokeApiKey(req.params.api_key_id)
+    (req) => revokeApiKey(req.params.api_key_id),
   );
 }

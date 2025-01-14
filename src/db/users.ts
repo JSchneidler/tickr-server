@@ -19,7 +19,8 @@ export async function updateUser(id: number, data: Prisma.UserUpdateInput) {
 }
 
 export async function deleteUser(id: number) {
-  return await db.user.delete({ where: { id } });
+  await db.user.delete({ where: { id } });
+  return id;
 }
 
 export default {
