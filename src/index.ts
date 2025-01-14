@@ -5,14 +5,20 @@ import {
   TypeBoxTypeProvider,
   TypeBoxValidatorCompiler,
 } from "@fastify/type-provider-typebox";
+import fastifyWebsocket from "@fastify/websocket";
 
 import routes from "./routes";
+import { init } from "./stocks/live";
+
+void init();
 
 const f = fastify({
   logger: true,
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 f.setValidatorCompiler(TypeBoxValidatorCompiler);
+
+f.register(fastifyWebsocket);
 
 f.register(fastifySwagger, {
   openapi: {

@@ -30,7 +30,7 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    () => getHoldings(),
+    getHoldings
   );
   f.get(
     "/:holding_id",
@@ -45,6 +45,6 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => getHolding(req.params.holding_id),
+    (req) => getHolding(req.params.holding_id)
   );
 }

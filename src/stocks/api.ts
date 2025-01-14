@@ -1,14 +1,13 @@
 import env from "../env";
 
 interface QuoteReply {
-  c: number;
-  d: number | null;
-  dp: number | null;
-  h: number;
-  l: number;
-  o: number;
-  pc: number;
-  t: number;
+  c: number; // Current price
+  d: number; // Change
+  dp: number; // Percent change
+  h: number; // High price of the day
+  l: number; // Low price of the day
+  o: number; // Open price of the day
+  pc: number; // Previous close price
 }
 
 const API_BASE_URL = "https://finnhub.io/api/v1";

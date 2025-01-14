@@ -13,7 +13,7 @@ export default function (f: FastifyTypeBox) {
     {
       schema: {
         params: Type.Object({
-          user_id: Type.String(),
+          user_id: Type.Number(),
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,
@@ -21,7 +21,9 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => banUser(req.params.user_id),
+    (req) => {
+      banUser(req.params.user_id);
+    }
   );
 
   f.get(
@@ -29,7 +31,7 @@ export default function (f: FastifyTypeBox) {
     {
       schema: {
         params: Type.Object({
-          user_id: Type.String(),
+          user_id: Type.Number(),
         }),
         response: {
           ...ERROR_RESPONSE_SCHEMAS,
@@ -37,6 +39,8 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => getHoldingsForUser(req.params.user_id),
+    (req) => {
+      getHoldingsForUser(req.params.user_id);
+    }
   );
 }

@@ -33,7 +33,7 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => createApiKey(req.body),
+    (req) => createApiKey(req.body)
   );
 
   f.get(
@@ -49,7 +49,7 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    getApiKeys,
+    getApiKeys
   );
 
   f.get(
@@ -65,7 +65,7 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => getApiKey(req.params.api_key_id),
+    (req) => getApiKey(req.params.api_key_id)
   );
 
   f.delete(
@@ -81,6 +81,6 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => revokeApiKey(req.params.api_key_id),
+    (req) => revokeApiKey(req.params.api_key_id)
   );
 }
