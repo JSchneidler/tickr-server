@@ -46,8 +46,9 @@ model User {
   AdminActionsTaken    AdminAction[] @relation("ActionsTaken")
   AdminActionsReceived AdminAction[] @relation("ActionsReceived")
 
-  password_digest String
-  api_keys        ApiKey[]
+  password_hash Bytes
+  salt          Bytes
+  api_keys      ApiKey[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

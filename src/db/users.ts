@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import db from "./db";
+import db from ".";
 
 export async function createUser(data: Prisma.UserCreateInput) {
   return await db.user.create({ data });

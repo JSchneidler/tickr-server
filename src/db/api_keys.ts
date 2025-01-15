@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import db from "./db";
+import db from ".";
 
 export async function createApiKey(data: Prisma.ApiKeyCreateInput) {
   return await db.apiKey.create({ data });

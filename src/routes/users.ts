@@ -3,13 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { FastifyTypeBox } from "../fastify-typebox";
 import { ERROR_RESPONSE_SCHEMAS } from "./errors";
 
-import {
-  createUser,
-  getUsers,
-  getUser,
-  updateUser,
-  deleteUser,
-} from "../db/users";
+import { getUsers, getUser, updateUser, deleteUser } from "../db/users";
 
 import api_keys from "./api_keys";
 import holdings from "./holdings";
@@ -31,23 +25,22 @@ export default function (f: FastifyTypeBox) {
   f.register(api_keys, { prefix: "/:user_id/api_keys" });
   f.register(holdings, { prefix: "/:user_id/holdings" });
 
-  // @ts-expect-error Date is assignable to type string
-  f.post(
-    "/",
-    {
-      schema: {
-        body: Type.Object({
-          name: Type.String(),
-          email: Type.String(),
-        }),
-        response: {
-          ...ERROR_RESPONSE_SCHEMAS,
-          201: USER_RESPONSE_SCHEMA,
-        },
-      },
-    },
-    (req) => createUser({ ...req.body, password_digest: "" }),
-  );
+  // f.post(
+  //   "/",
+  //   {
+  //     schema: {
+  //       body: Type.Object({
+  //         name: Type.String(),
+  //         email: Type.String(),
+  //       }),
+  //       response: {
+  //         ...ERROR_RESPONSE_SCHEMAS,
+  //         201: USER_RESPONSE_SCHEMA,
+  //       },
+  //     },
+  //   },
+  //   (req) => createUser({ ...req.body, password_hash: "" }),
+  // );
 
   // @ts-expect-error Decimal is assignable to type number
   f.get(

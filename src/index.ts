@@ -5,10 +5,14 @@ import {
   TypeBoxTypeProvider,
   TypeBoxValidatorCompiler,
 } from "@fastify/type-provider-typebox";
+import fastifyCookie from "@fastify/cookie";
+import fastifySession from "@fastify/session";
 import fastifyWebsocket from "@fastify/websocket";
 
+import fastifyPassport from "./auth";
 import routes from "./routes";
 import { init } from "./stocks/live";
+import env from "./env";
 
 void init();
 
@@ -18,7 +22,12 @@ const f = fastify({
 
 f.setValidatorCompiler(TypeBoxValidatorCompiler);
 
+f.register(fastifyCookie);
+f.register(fastifySession, { secret: env.SESSION_SECRET });
 f.register(fastifyWebsocket);
+
+f.register(fastifyPassport.initialize());
+f.register(fastifyPassport.secureSession());
 
 f.register(fastifySwagger, {
   openapi: {

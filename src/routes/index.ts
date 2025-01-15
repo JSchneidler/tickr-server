@@ -2,6 +2,7 @@ import { FastifyTypeBox } from "../fastify-typebox";
 import { quote } from "../stocks/api";
 import { latestPrices } from "../stocks/live";
 
+import auth from "./auth";
 import admin from "./admin";
 import orders from "./orders";
 import users from "./users";
@@ -36,6 +37,7 @@ export default function (f: FastifyTypeBox) {
 
   f.get("/quote", async () => await quote("AAPL"));
 
+  f.register(auth, { prefix: "/auth" });
   f.register(admin, { prefix: "/admin" });
   f.register(orders, { prefix: "/orders" });
   f.register(users, { prefix: "/users" });

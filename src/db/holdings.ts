@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import db from "./db";
+import db from ".";
 
 export async function createHolding(data: Prisma.HoldingCreateInput) {
   return await db.holding.create({ data });

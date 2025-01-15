@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-import db from "./db";
+import db from ".";
 
 export async function createOrder(data: Prisma.OrderCreateInput) {
   return await db.order.create({ data });
