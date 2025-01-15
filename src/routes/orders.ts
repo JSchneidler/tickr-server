@@ -39,7 +39,8 @@ export default function (f: FastifyTypeBox) {
         },
       },
     },
-    (req) => createOrder({ ...req.body, User: {} }),
+    (req) =>
+      createOrder({ ...req.body, User: {}, direction: "BUY", type: "MARKET" }),
   );
 
   // @ts-expect-error Decimal is assignable to type number

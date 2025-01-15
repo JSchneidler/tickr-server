@@ -13,7 +13,12 @@ export default function (f: FastifyTypeBox) {
     console.log("Client connected");
 
     setInterval(() => {
-      connection.send(JSON.stringify(latestPrices));
+      connection.send(
+        JSON.stringify({
+          type: "prices",
+          prices: latestPrices,
+        }),
+      );
     }, 1000);
 
     // connection.on("message", (message) => {

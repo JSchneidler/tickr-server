@@ -15,9 +15,16 @@ enum Role {
   ADMIN
 }
 
-enum OrderType {
+enum OrderDirection {
   BUY
   SELL
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+  STOP
+  TRAILING_STOP
 }
 
 enum AdminActionType {
@@ -78,6 +85,9 @@ model Order {
   symbol String
   shares Decimal
   price  Decimal
+
+  direction OrderDirection
+  type      OrderType
 
   User   User @relation(fields: [userId], references: [id])
   userId Int

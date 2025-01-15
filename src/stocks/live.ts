@@ -32,18 +32,18 @@ interface Price {
 
 type Prices = Record<string, Price>;
 
-// interface Trade {
-//   c: number[] | undefined; // Trade conditions
-//   p: number; // Last price
-//   s: string; // Symbol
-//   t: string; // UNIX Timetamp (ms)
-//   v: string; // Volume
-// }
+interface Trade {
+  c: number[] | undefined; // Trade conditions
+  p: number; // Last price
+  s: string; // Symbol
+  t: string; // UNIX Timetamp (ms)
+  v: string; // Volume
+}
 
-// interface Response {
-//   data: Trade[];
-//   type: "trade" | "";
-// }
+interface Response {
+  data: Trade[];
+  type: "trade" | "";
+}
 
 export const latestPrices: Prices = {};
 
@@ -60,8 +60,6 @@ export async function init() {
     };
   }
 
-  console.log(latestPrices);
-
   const URL = `${FINNHUB_WEBSOCKET_URL}?token=${env.FINNHUB_API_KEY}`;
   const ws = new WebSocket(URL, {});
 
@@ -73,27 +71,33 @@ export async function init() {
     }
   });
 
-  // ws.on("message", (message: string) => {
-  //   const response = JSON.parse(message) as Response;
-  //   if (response.type == "trade") {
-  //     for (const trade of response.data) {
-  //       const symbol = trade.s;
-  //       const price = trade.p;
+  ws.on("message", (message: string) => {
+    const response = JSON.parse(message) as Response;
+    if (response.type == "trade") {
+      for (const trade of response.data) {
+        const symbol = trade.s;
+        const price = trade.p;
+        let change = 0;
+        let change_percent = 0;
+        let open_price = 0;
 
-  //       const latest = latestPrices[symbol];
-  //       const change = price - latest.open_price;
-  //       const change_percent = (change / latest.open_price) * 100;
+        const latest = latestPrices[symbol];
+        if (latest) {
+          open_price = latest.open_price;
+          change = price - latest.open_price;
+          change_percent = (change / latest.open_price) * 100;
+        }
 
-  //       latestPrices[symbol] = {
-  //         ...latestPrices[symbol],
-  //         symbol,
-  //         price,
-  //         change,
-  //         change_percent,
-  //       };
-  //     }
-  //   }
-  // });
+        latestPrices[symbol] = {
+          symbol,
+          price,
+          change,
+          change_percent,
+          open_price,
+        };
+      }
+    }
+  });
 
   ws.on("error", console.error);
 }
