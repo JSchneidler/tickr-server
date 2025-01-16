@@ -10,6 +10,7 @@ pnpm-debug.log*
 # Sensitive
 .env*
 *.db
+*.db-journal
 
 # Assets/Dependencies
 node_modules

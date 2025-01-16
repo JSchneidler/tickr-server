@@ -1,64 +1,27 @@
 import fastify from "fastify";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
-import {
-  TypeBoxTypeProvider,
-  TypeBoxValidatorCompiler,
-} from "@fastify/type-provider-typebox";
-import fastifyCookie from "@fastify/cookie";
-import fastifySession from "@fastify/session";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import fastifyCors from "@fastify/cors";
 import fastifyWebsocket from "@fastify/websocket";
 
-import fastifyPassport from "./auth";
-import routes from "./routes";
 import { init } from "./stocks/live";
-import env from "./env";
+import jwtAuth from "./auth";
+import api from "./api";
 
 void init();
 
-const f = fastify({
-  logger: true,
-}).withTypeProvider<TypeBoxTypeProvider>();
+const f = fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
 
-f.setValidatorCompiler(TypeBoxValidatorCompiler);
+await f.register(jwtAuth);
 
-f.register(fastifyCookie);
-f.register(fastifySession, { secret: env.SESSION_SECRET });
-f.register(fastifyWebsocket);
-
-f.register(fastifyPassport.initialize());
-f.register(fastifyPassport.secureSession());
-
-f.register(fastifySwagger, {
-  openapi: {
-    openapi: "3.1.0",
-    info: {
-      title: "Tickr API",
-      description: "Tickr API",
-      version: "0.0.0",
-    },
-    components: {
-      securitySchemes: {
-        apiKey: {
-          type: "apiKey",
-          name: "apiKey",
-          in: "header",
-        },
-      },
-    },
-  },
+await f.register(fastifyWebsocket);
+await f.register(fastifyCors, {
+  origin: "http://localhost:5173", // TODO: Don't hardcode
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "debug"],
 });
 
-f.register(fastifySwaggerUi, {
-  routePrefix: "/docs",
-  uiConfig: {
-    docExpansion: "full",
-    deepLinking: false,
-  },
-  staticCSP: true,
-});
-
-f.register(routes);
+await f.register(api, { prefix: "/api" });
 
 const start = async () => {
   try {

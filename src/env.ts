@@ -6,7 +6,7 @@ dotenv.config();
 
 const envSchema = Type.Object({
   FINNHUB_API_KEY: Type.String(),
-  SESSION_SECRET: Type.String(),
+  JWT_SECRET: Type.String(),
 });
 
 const env = Value.Parse(envSchema, process.env);

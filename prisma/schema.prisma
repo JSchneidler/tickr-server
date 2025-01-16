@@ -48,17 +48,17 @@ model User {
 
   password_hash Bytes
   salt          Bytes
-  api_keys      ApiKey[]
+  AccessTokens  AccessToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model ApiKey {
+model AccessToken {
   id   Int    @id @default(autoincrement())
   name String
 
-  token_digest String
+  token_hash Bytes
 
   User   User @relation(fields: [userId], references: [id])
   userId Int
@@ -71,7 +71,6 @@ model Holding {
   id     Int     @id @default(autoincrement())
   symbol String
   shares Decimal
-  price  Decimal
 
   User   User @relation(fields: [userId], references: [id])
   userId Int
@@ -86,6 +85,7 @@ model Order {
   symbol String
   shares Decimal
   price  Decimal
+  filled Boolean
 
   direction OrderDirection
   type      OrderType
@@ -93,8 +93,9 @@ model Order {
   User   User @relation(fields: [userId], references: [id])
   userId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model AdminAction {
