@@ -109,3 +109,17 @@ model AdminAction {
 
   createdAt DateTime @default(now())
 }
+
+model Symbol {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  displayName String
+  description String
+
+  mic  String
+  figi String @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}

@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 
 import env from "../env";
-import { quote } from "./api";
+import { getQuote } from "./finnhub_api";
 
 const FINNHUB_WEBSOCKET_URL = "wss://ws.finnhub.io";
 
@@ -50,7 +50,7 @@ export const latestPrices: Prices = {};
 export async function init() {
   // TODO: Switch to Promise.all and eventually link to cache/DB
   for (const symbol of SUBSCRIBED_SYMBOLS) {
-    const symbolInfo = await quote(symbol);
+    const symbolInfo = await getQuote(symbol);
     latestPrices[symbol] = {
       symbol,
       price: symbolInfo.c,

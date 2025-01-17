@@ -3,10 +3,12 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
 import authRoutes from "./auth/auth.routes";
+// import adminRoutes from "./admin/admin.routes";
 import userRoutes from "./user/user.routes";
 
-import { quote } from "./stocks/api";
-import { latestPrices } from "./stocks/live";
+import { getQuote } from "./stocks/finnhub_api";
+import { latestPrices } from "./stocks/finnhub_live";
+import symbolRoutes from "./symbol/symbol.routes";
 
 export default async function (f: FastifyInstance) {
   await f.register(fastifySwagger, {
@@ -66,10 +68,10 @@ export default async function (f: FastifyInstance) {
     });
   });
 
-  f.get("/quote", async () => await quote("AAPL"));
+  f.get("/quote", async () => await getQuote("AAPL"));
 
   await f.register(authRoutes, { prefix: "/auth" });
-  await f.register(userRoutes, { prefix: "/users" });
   // await f.register(adminRoutes, { prefix: "/admin" });
-  // await f.register(orderRoutes, { prefix: "/orders" });
+  await f.register(symbolRoutes, { prefix: "/symbol" });
+  await f.register(userRoutes, { prefix: "/user" });
 }

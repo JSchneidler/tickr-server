@@ -20,6 +20,7 @@ export default function (f: FastifyInstance) {
   f.post(
     "/",
     {
+      onRequest: [f.authenticate],
       schema: {
         body: createOrderSchema,
         response: {
@@ -63,6 +64,7 @@ export default function (f: FastifyInstance) {
   f.put(
     "/:order_id",
     {
+      onRequest: [f.authenticate],
       schema: {
         params: Type.Object({
           order_id: Type.Number(),
@@ -80,6 +82,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:order_id",
     {
+      onRequest: [f.authenticate],
       schema: {
         params: Type.Object({
           order_id: Type.Number(),

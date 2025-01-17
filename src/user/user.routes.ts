@@ -8,8 +8,9 @@ import {
   deleteUserHandler,
 } from "./user.controller";
 
-import tokens from "../token/token.routes";
-import holdings from "../holding/holding.routes";
+import tokenRoutes from "../token/token.routes";
+import holdingRoutes from "../holding/holding.routes";
+import orderRoutes from "../order/order.routes";
 
 import {
   usersResponseSchema,
@@ -19,9 +20,10 @@ import {
 } from "./user.schema";
 import { errorResponseSchemas } from "../error_responses.schema";
 
-export default function (f: FastifyInstance) {
-  f.register(tokens, { prefix: "/:user_id/tokens" });
-  f.register(holdings, { prefix: "/:user_id/holdings" });
+export default async function (f: FastifyInstance) {
+  await f.register(tokenRoutes, { prefix: "/:user_id/tokens" });
+  await f.register(holdingRoutes, { prefix: "/:user_id/holdings" });
+  await f.register(orderRoutes, { prefix: "/orders" });
 
   f.get(
     "/",

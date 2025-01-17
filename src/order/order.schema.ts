@@ -27,7 +27,7 @@ export const orderResponseSchema = Type.Object({
   filled: Type.Boolean(),
   createdAt: Type.String(),
   updatedAt: Type.String(),
-  deletedAt: Type.Optional(Type.String()),
+  deletedAt: Type.Union([Type.String(), Type.Null()]),
 });
 export type OrderResponse = Static<typeof orderResponseSchema>;
 

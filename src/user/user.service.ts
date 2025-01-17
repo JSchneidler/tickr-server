@@ -3,6 +3,9 @@ import { CreateUserInput, UpdateUserInput } from "./user.schema";
 import { hashPassword } from "../auth";
 import { createToken } from "../token/token.service";
 
+// TODO: Get from DB based on mode
+const DEFAULT_BALANCE = 100000;
+
 export async function createUser(data: CreateUserInput) {
   const password_hash = await hashPassword(data.password);
 
@@ -11,6 +14,7 @@ export async function createUser(data: CreateUserInput) {
     data: {
       name: data.name,
       email: data.email,
+      balance: DEFAULT_BALANCE,
       password_hash: password_hash.hash,
       salt: password_hash.salt,
     },

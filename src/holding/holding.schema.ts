@@ -10,7 +10,7 @@ export const holdingResponseSchema = Type.Object({
   id: Type.Number(),
   createdAt: Type.String(),
   updatedAt: Type.String(),
-  deletedAt: Type.Optional(Type.String()),
+  deletedAt: Type.Union([Type.String(), Type.Null()]),
 });
 export type HoldingResponse = Static<typeof holdingResponseSchema>;
 

@@ -16,7 +16,6 @@ export async function loginHandler(
   req: FastifyRequest<{ Body: LoginInput }>,
   rep: FastifyReply,
 ) {
-  // TODO: Login with username and password, return a JWT
   const user = await db.user.findUniqueOrThrow({
     where: { email: req.body.email },
     omit: { password_hash: false, salt: false },

@@ -3,7 +3,7 @@ import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import fastifyCors from "@fastify/cors";
 import fastifyWebsocket from "@fastify/websocket";
 
-import { init } from "./stocks/live";
+import { init } from "./stocks/finnhub_live";
 import jwtAuth from "./auth";
 import api from "./api";
 
