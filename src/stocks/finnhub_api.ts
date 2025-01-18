@@ -23,6 +23,14 @@ interface Symbol {
   type: string; // Security type
 }
 
+type CryptoExchangesResponse = string[];
+
+interface CryptoSymbol {
+  description: string;
+  displaySymbol: string;
+  symbol: string;
+}
+
 const API_BASE_URL = "https://finnhub.io/api/v1";
 
 // TODO: Create client?
@@ -36,13 +44,29 @@ export async function getQuote(symbol: string) {
   const request = baseRequest(API_BASE_URL + `/quote?symbol=${symbol}`);
 
   const response = await fetch(request);
-  return response.json() as Promise<Quote>;
+  return (await response.json()) as Quote;
 }
 
 // Only supports US markets for now
-export async function getSymbols() {
+export async function getStockSymbols() {
   const request = baseRequest(API_BASE_URL + `/stock/symbol?exchange=US`);
 
   const response = await fetch(request);
-  return response.json() as Promise<Symbol[]>;
+  return (await response.json()) as Symbol[];
+}
+
+export async function getCryptoExchanges() {
+  const request = baseRequest(API_BASE_URL + "/crypto/exchange");
+
+  const response = await fetch(request);
+  return (await response.json()) as CryptoExchangesResponse;
+}
+
+export async function getCryptoSymbols(exchange: string) {
+  const request = baseRequest(
+    API_BASE_URL + `/stock/symbol?exchange=${exchange}`,
+  );
+
+  const response = await fetch(request);
+  return (await response.json()) as CryptoSymbol[];
 }

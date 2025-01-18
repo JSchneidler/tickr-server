@@ -11,6 +11,7 @@ export const userResponseSchema = Type.Object({
   ...userCore,
   id: Type.Number(),
   balance: Type.Number(),
+  deposits: Type.Number(),
   role: Type.String(),
   createdAt: Type.String(),
   updatedAt: Type.String(),

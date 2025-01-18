@@ -6,9 +6,8 @@ import authRoutes from "./auth/auth.routes";
 // import adminRoutes from "./admin/admin.routes";
 import userRoutes from "./user/user.routes";
 
-import { getQuote } from "./stocks/finnhub_api";
-import { latestPrices } from "./stocks/finnhub_live";
 import symbolRoutes from "./symbol/symbol.routes";
+import { getCompanyInfo } from "./stocks/polygon_api";
 
 export default async function (f: FastifyInstance) {
   await f.register(fastifySwagger, {
@@ -41,19 +40,17 @@ export default async function (f: FastifyInstance) {
     staticCSP: true,
   });
 
-  f.get("/", () => "Welcome to the API!");
-
   f.get("/ws", { websocket: true }, (connection) => {
     console.log("Client connected");
 
-    setInterval(() => {
-      connection.send(
-        JSON.stringify({
-          type: "prices",
-          prices: latestPrices,
-        }),
-      );
-    }, 1000);
+    // setInterval(() => {
+    //   connection.send(
+    //     JSON.stringify({
+    //       type: "prices",
+    //       prices: latestPrices,
+    //     })
+    //   );
+    // }, 1000);
 
     // connection.on("message", (message) => {
     //   console.log(message.toString());
@@ -68,7 +65,7 @@ export default async function (f: FastifyInstance) {
     });
   });
 
-  f.get("/quote", async () => await getQuote("AAPL"));
+  f.get("/", async () => await getCompanyInfo("NVDA"));
 
   await f.register(authRoutes, { prefix: "/auth" });
   // await f.register(adminRoutes, { prefix: "/admin" });

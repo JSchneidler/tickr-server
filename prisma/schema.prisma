@@ -32,12 +32,18 @@ enum AdminActionType {
   BAN_USER
 }
 
+enum SymbolType {
+  STOCK
+  CRYPTO
+}
+
 model User {
   id    Int    @id @default(autoincrement())
   email String @unique
   name  String
 
-  balance Decimal @default(0)
+  deposits Decimal @default(0)
+  balance  Decimal @default(0)
 
   Holdings Holding[]
   Orders   Order[]
@@ -78,14 +84,19 @@ model Holding {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@unique([userId, symbol])
 }
 
 model Order {
-  id     Int     @id @default(autoincrement())
+  id     Int      @id @default(autoincrement())
   symbol String
   shares Decimal
-  price  Decimal
-  filled Boolean
+  price  Decimal?
+
+  filled     Boolean  @default(false)
+  sharePrice Decimal?
+  totalPrice Decimal?
 
   direction OrderDirection
   type      OrderType
@@ -111,15 +122,18 @@ model AdminAction {
 }
 
 model Symbol {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
+  id          Int        @id @default(autoincrement())
+  name        String
   displayName String
-  description String
+  description String?
+  type        SymbolType
 
-  mic  String
-  figi String @unique
+  mic  String?
+  figi String? @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@unique([name, type])
 }

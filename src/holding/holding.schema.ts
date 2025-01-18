@@ -8,6 +8,7 @@ const holdingCore = {
 export const holdingResponseSchema = Type.Object({
   ...holdingCore,
   id: Type.Number(),
+  userId: Type.Number(),
   createdAt: Type.String(),
   updatedAt: Type.String(),
   deletedAt: Type.Union([Type.String(), Type.Null()]),
@@ -23,7 +24,5 @@ export type CreateHoldingInput = Static<typeof createHoldingSchema>;
 export const getHoldingSchema = Type.Object({ holding_id: Type.Number() });
 export type GetHoldingInput = Static<typeof getHoldingSchema>;
 
-export const updateHoldingSchema = Type.Object(
-  Type.Omit(createHoldingSchema, ["symbol"]),
-);
+export const updateHoldingSchema = Type.Omit(createHoldingSchema, ["symbol"]);
 export type UpdateHoldingInput = Static<typeof updateHoldingSchema>;

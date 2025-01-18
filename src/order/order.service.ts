@@ -1,4 +1,5 @@
 import db from "../db";
+import tradeEngine from "../tradeEngine";
 import { UserWithoutSensitive } from "../user/user.schema";
 import { CreateOrderInput, UpdateOrderInput } from "./order.schema";
 
@@ -6,7 +7,15 @@ export async function createOrder(
   data: CreateOrderInput,
   user: UserWithoutSensitive,
 ) {
-  return await db.order.create({ data: { ...data, userId: user.id } });
+  if (!(await db.symbol.findFirst({ where: { name: data.symbol } })))
+    throw Error("Symbol not found in DB");
+
+  const order = await db.order.create({ data: { ...data, userId: user.id } });
+
+  // @ts-expect-error: Decimal is assignable to number
+  tradeEngine.addOrder(order);
+
+  return order;
 }
 
 export async function getOrders() {

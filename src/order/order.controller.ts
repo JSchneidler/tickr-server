@@ -1,4 +1,4 @@
-import { FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 import {
   getOrders,
@@ -13,10 +13,43 @@ import {
   UpdateOrderInput,
 } from "./order.schema";
 
+import db from "../db";
+import { OrderDirection } from "@prisma/client";
+
 export async function createOrderHandler(
   req: FastifyRequest<{ Body: CreateOrderInput }>,
+  rep: FastifyReply,
 ) {
-  return await createOrder(req.body, req.user);
+  const order = req.body;
+
+  if (req.body.direction === "SELL") {
+    const sharesBeingSoldAgg = await db.order.aggregate({
+      _sum: {
+        shares: true,
+      },
+      where: {
+        userId: req.user.id,
+        filled: false,
+        symbol: order.symbol,
+        direction: OrderDirection.SELL,
+      },
+    });
+
+    const holding = await db.holding.findUniqueOrThrow({
+      where: { userId_symbol: { symbol: order.symbol, userId: req.user.id } },
+    });
+
+    if (
+      holding.shares.lessThan(
+        sharesBeingSoldAgg._sum.shares
+          ? sharesBeingSoldAgg._sum.shares.add(order.shares)
+          : order.shares,
+      )
+    )
+      return rep.code(400).send("Insufficient shares in holding");
+  }
+
+  return await createOrder(order, req.user);
 }
 
 export async function getOrdersHandler() {

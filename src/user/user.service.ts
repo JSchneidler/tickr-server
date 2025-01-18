@@ -15,6 +15,7 @@ export async function createUser(data: CreateUserInput) {
       name: data.name,
       email: data.email,
       balance: DEFAULT_BALANCE,
+      deposits: DEFAULT_BALANCE,
       password_hash: password_hash.hash,
       salt: password_hash.salt,
     },

@@ -1,21 +1,10 @@
+import { OrderDirection, OrderType } from "@prisma/client";
 import { Type, type Static } from "@sinclair/typebox";
-
-enum OrderDirection {
-  BUY,
-  SELL,
-}
-
-enum OrderType {
-  MARKET,
-  LIMIT,
-  STOP,
-  TRAILING_STOP,
-}
 
 const orderCore = {
   symbol: Type.String(),
   shares: Type.Number(),
-  price: Type.Number(),
+  price: Type.Optional(Type.Number()),
 
   direction: Type.Enum(OrderDirection),
   type: Type.Enum(OrderType),
@@ -24,7 +13,10 @@ const orderCore = {
 export const orderResponseSchema = Type.Object({
   ...orderCore,
   id: Type.Number(),
+  userId: Type.Number(),
   filled: Type.Boolean(),
+  sharePrice: Type.Number(),
+  totalPrice: Type.Number(),
   createdAt: Type.String(),
   updatedAt: Type.String(),
   deletedAt: Type.Union([Type.String(), Type.Null()]),
@@ -40,7 +32,8 @@ export type CreateOrderInput = Static<typeof createOrderSchema>;
 export const getOrderSchema = Type.Object({ order_id: Type.Number() });
 export type GetOrderInput = Static<typeof getOrderSchema>;
 
-export const updateOrderSchema = Type.Object(
-  Type.Omit(createOrderSchema, ["symbol", "price", "direction"]),
-);
+export const updateOrderSchema = Type.Omit(createOrderSchema, [
+  "symbol",
+  "direction",
+]);
 export type UpdateOrderInput = Static<typeof updateOrderSchema>;

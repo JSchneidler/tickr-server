@@ -23,7 +23,7 @@ import { errorResponseSchemas } from "../error_responses.schema";
 export default async function (f: FastifyInstance) {
   await f.register(tokenRoutes, { prefix: "/:user_id/tokens" });
   await f.register(holdingRoutes, { prefix: "/:user_id/holdings" });
-  await f.register(orderRoutes, { prefix: "/orders" });
+  await f.register(orderRoutes, { prefix: "/:user_id/orders" });
 
   f.get(
     "/",

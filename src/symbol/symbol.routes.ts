@@ -8,8 +8,8 @@ import {
   searchSymbolsHandler,
 } from "./symbol.controller";
 import {
+  fullSymbolResponseSchema,
   getSymbolSchema,
-  searchSymbolsResponseSchema,
   searchSymbolsSchema,
   symbolResponseSchema,
   symbolsResponseSchema,
@@ -30,13 +30,13 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:symbol_id",
+    "/:type/:name",
     {
       schema: {
         params: getSymbolSchema,
         response: {
           ...errorResponseSchemas,
-          200: symbolResponseSchema,
+          200: fullSymbolResponseSchema,
         },
       },
     },
@@ -48,10 +48,10 @@ export default function (f: FastifyInstance) {
     {
       schema: {
         params: searchSymbolsSchema,
-        // response: {
-        //   ...errorResponseSchemas,
-        //   200: searchSymbolsResponseSchema,
-        // },
+        response: {
+          ...errorResponseSchemas,
+          200: symbolsResponseSchema,
+        },
       },
     },
     searchSymbolsHandler,

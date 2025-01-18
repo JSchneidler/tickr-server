@@ -9,6 +9,7 @@ export type CreateTokenInput = Static<typeof createTokenSchema>;
 export const tokenResponseSchema = Type.Object({
   ...tokenCore,
   id: Type.Number(),
+  userId: Type.Number(),
   createdAt: Type.String(),
   revokedAt: Type.Optional(Type.String()),
 });
