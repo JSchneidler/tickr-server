@@ -8,10 +8,6 @@ import {
   deleteUserHandler,
 } from "./user.controller";
 
-import tokenRoutes from "../token/token.routes";
-import holdingRoutes from "../holding/holding.routes";
-import orderRoutes from "../order/order.routes";
-
 import { errorResponseSchemas } from "../error_responses.schema";
 import {
   getUserParams,
@@ -20,11 +16,7 @@ import {
   userResponse,
 } from "./user.schema";
 
-export default async function (f: FastifyInstance) {
-  await f.register(tokenRoutes, { prefix: "/:userId/tokens" });
-  await f.register(holdingRoutes, { prefix: "/:userId/holdings" });
-  await f.register(orderRoutes, { prefix: "/:userId/orders" });
-
+export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
@@ -36,7 +28,7 @@ export default async function (f: FastifyInstance) {
         },
       },
     },
-    getUsersHandler,
+    getUsersHandler
   );
 
   f.get(
@@ -51,7 +43,7 @@ export default async function (f: FastifyInstance) {
         },
       },
     },
-    getUserHandler,
+    getUserHandler
   );
 
   f.put(
@@ -67,7 +59,7 @@ export default async function (f: FastifyInstance) {
         },
       },
     },
-    updateUserHandler,
+    updateUserHandler
   );
 
   f.delete(
@@ -82,6 +74,6 @@ export default async function (f: FastifyInstance) {
         },
       },
     },
-    deleteUserHandler,
+    deleteUserHandler
   );
 }

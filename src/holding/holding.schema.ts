@@ -1,21 +1,28 @@
-import { Type, type Static } from "@sinclair/typebox";
+import {
+  Number,
+  Object,
+  String,
+  Optional,
+  Array,
+  type Static,
+} from "@sinclair/typebox";
 import { userId } from "../user/user.schema";
 import { symbolId } from "../symbol/symbol.schema";
 
 // API
-export const holdingId = Type.Number();
+export const holdingId = Number();
 
-export const getHoldingParams = Type.Object({
+export const getHoldingParams = Object({
   holdingId,
 });
 export type GetHoldingParams = Static<typeof getHoldingParams>;
 
-export const holdingResponse = Type.Object({
+export const holdingResponse = Object({
   id: holdingId,
   userId,
   symbolId,
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
-  deletedAt: Type.Union([Type.String(), Type.Null()]),
+  createdAt: String(),
+  updatedAt: String(),
+  deletedAt: Optional(String()),
 });
-export const holdingsResponse = Type.Array(holdingResponse);
+export const holdingsResponse = Array(holdingResponse);

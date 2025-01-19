@@ -1,9 +1,8 @@
-import { Type } from "@sinclair/typebox";
+import { Omit, Object, String, type Static } from "@sinclair/typebox";
 
 import {
   UserWithoutSensitive,
   createUserRequestBody,
-  CreateUserRequestBody,
   userResponse,
 } from "../user/user.schema";
 
@@ -14,10 +13,10 @@ export interface UserWithToken {
 }
 
 // API
-export { createUserRequestBody as loginRequestBody };
-export type LoginRequestBody = CreateUserRequestBody;
+export const loginRequestBody = Omit(createUserRequestBody, ["name"]);
+export type LoginRequestBody = Static<typeof loginRequestBody>;
 
-export const loginResponse = Type.Object({
-  token: Type.String(),
+export const loginResponse = Object({
+  token: String(),
   user: userResponse,
 });

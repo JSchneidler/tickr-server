@@ -3,9 +3,10 @@ import { Prisma, Symbol, SymbolType } from "@prisma/client";
 import db from "../db";
 import { getCompanyInfo } from "../stocks/polygon_api";
 import { FullSymbolResponse } from "./symbol.schema";
+import { getQuote } from "../stocks/finnhub_api";
 
 export async function createSymbol(
-  symbolInput: Prisma.SymbolCreateInput,
+  symbolInput: Prisma.SymbolCreateInput
 ): Promise<Symbol> {
   return await db.symbol.create({
     data: symbolInput,
@@ -17,13 +18,16 @@ export async function getSymbols(): Promise<Symbol[]> {
 }
 
 export async function getSymbol(
-  id: number,
+  id: number
 ): Promise<Symbol | FullSymbolResponse> {
   const symbol = await db.symbol.findUniqueOrThrow({ where: { id } });
 
   if (symbol.type === SymbolType.STOCK) {
     // TODO: Cache info in DB
-    const companyInfo = await getCompanyInfo(symbol.name);
+    const [quote, companyInfo] = await Promise.all([
+      getQuote(symbol.name),
+      getCompanyInfo(symbol.name),
+    ]);
 
     return {
       ...symbol,
@@ -35,6 +39,14 @@ export async function getSymbol(
       sic_code: companyInfo.sic_code || null,
       sic_description: companyInfo.sic_description || null,
       total_employees: companyInfo.total_employees || null,
+
+      currentPrice: quote.c.toString(),
+      openPrice: quote.o.toString(),
+      change: quote.d.toString(),
+      changePercent: quote.dp.toString(),
+      dayHigh: quote.h.toString(),
+      dayLow: quote.l.toString(),
+      previousClose: quote.pc.toString(),
     };
   }
 
@@ -43,7 +55,7 @@ export async function getSymbol(
 
 export async function updateSymbol(
   id: number,
-  symbolUpdates: Prisma.SymbolUpdateInput,
+  symbolUpdates: Prisma.SymbolUpdateInput
 ): Promise<Symbol> {
   return await db.symbol.update({ where: { id }, data: symbolUpdates });
 }

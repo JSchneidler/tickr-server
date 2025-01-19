@@ -1,45 +1,66 @@
 import { SymbolType } from "@prisma/client";
-import { Type, type Static } from "@sinclair/typebox";
+import {
+  Number,
+  Object,
+  String,
+  Union,
+  Null,
+  Enum,
+  Optional,
+  Array,
+  type Static,
+} from "@sinclair/typebox";
 
 // API
-export const symbolId = Type.Number();
+export const symbolId = Number();
 
-export const getSymbolParams = Type.Object({
+export const getSymbolParams = Object({
   symbolId,
 });
 export type GetSymbolParams = Static<typeof getSymbolParams>;
 
-export const searchSymbolsParams = Type.Object({
-  text: Type.String(),
+export const searchSymbolsParams = Object({
+  text: String(),
 });
 export type SearchSymbolsParams = Static<typeof searchSymbolsParams>;
 
-export const symbolResponse = Type.Object({
+export const symbolResponse = Object({
   id: symbolId,
-  name: Type.String(),
-  displayName: Type.String(),
-  description: Type.Union([Type.String(), Type.Null()]),
-  type: Type.Enum(SymbolType),
-  mic: Type.Union([Type.String(), Type.Null()]),
-  figi: Type.Union([Type.String(), Type.Null()]),
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
-  deletedAt: Type.Union([Type.String(), Type.Null()]),
+  name: String(),
+  displayName: String(),
+  description: Union([String(), Null()]),
+  type: Enum(SymbolType),
+  mic: Union([String(), Null()]),
+  figi: Union([String(), Null()]),
+  createdAt: String(),
+  updatedAt: String(),
+  deletedAt: Optional(String()),
 });
-export const symbolsResponse = Type.Array(symbolResponse);
+export const symbolsResponse = Array(symbolResponse);
 
-const companyInfoResponse = Type.Object({
-  companyName: Type.Union([Type.String(), Type.Null()]),
-  companyDescription: Type.Union([Type.String(), Type.Null()]),
-  homepageUrl: Type.Union([Type.String(), Type.Null()]),
-  marketCap: Type.Union([Type.Number(), Type.Null()]),
-  sic_code: Type.Union([Type.String(), Type.Null()]),
-  sic_description: Type.Union([Type.String(), Type.Null()]),
-  total_employees: Type.Union([Type.Number(), Type.Null()]),
+const companyInfoResponse = Object({
+  companyName: Union([String(), Null()]),
+  companyDescription: Union([String(), Null()]),
+  homepageUrl: Union([String(), Null()]),
+  marketCap: Union([Number(), Null()]),
+  sic_code: Union([String(), Null()]),
+  sic_description: Union([String(), Null()]),
+  total_employees: Union([Number(), Null()]),
 });
 
-export const fullSymbolResponse = Type.Object({
+const priceInfoResponse = Object({
+  currentPrice: Union([String(), Null()]),
+  openPrice: Union([String(), Null()]),
+  change: Union([String(), Null()]),
+  changePercent: Union([String(), Null()]),
+  dayHigh: Union([String(), Null()]),
+  dayLow: Union([String(), Null()]),
+  previousClose: Union([String(), Null()]),
+});
+
+export const fullSymbolResponse = Object({
   ...symbolResponse.properties,
   ...companyInfoResponse.properties,
+  ...priceInfoResponse.properties,
 });
 export type FullSymbolResponse = Static<typeof fullSymbolResponse>;

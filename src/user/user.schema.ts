@@ -1,5 +1,15 @@
 import { Prisma } from "@prisma/client";
-import { Type, type Static } from "@sinclair/typebox";
+import {
+  Number,
+  Object,
+  String,
+  Partial,
+  Required,
+  Omit,
+  Optional,
+  Array,
+  type Static,
+} from "@sinclair/typebox";
 
 // Prisma
 export type UserWithoutSensitive = Prisma.UserGetPayload<{
@@ -16,32 +26,32 @@ export interface UserUpdateInput extends Prisma.UserUpdateInput {
 }
 
 // API
-export const userId = Type.Number();
+export const userId = Number();
 
-export const getUserParams = Type.Object({
+export const getUserParams = Object({
   userId,
 });
 export type GetUserParams = Static<typeof getUserParams>;
 
-export const createUserRequestBody = Type.Object({
-  email: Type.String({ minLength: 5 }),
-  name: Type.String({ minLength: 1 }),
-  password: Type.String({ minLength: 10 }),
+export const createUserRequestBody = Object({
+  email: String({ minLength: 5 }),
+  name: String({ minLength: 1 }),
+  password: String({ minLength: 10 }),
 });
 export type CreateUserRequestBody = Static<typeof createUserRequestBody>;
 
-export const updateUserRequestBody = Type.Object({
-  ...Type.Partial(createUserRequestBody).properties,
-  role: Type.String(),
+export const updateUserRequestBody = Object({
+  ...Partial(createUserRequestBody).properties,
+  role: String(),
 });
 
-export const userResponse = Type.Object({
-  ...Type.Required(Type.Omit(updateUserRequestBody, ["password"])).properties,
+export const userResponse = Object({
+  ...Required(Omit(updateUserRequestBody, ["password"])).properties,
   id: userId,
-  deposits: Type.String(),
-  balance: Type.String(),
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
-  deletedAt: Type.Union([Type.String(), Type.Null()]),
+  deposits: String(),
+  balance: String(),
+  createdAt: String(),
+  updatedAt: String(),
+  deletedAt: Optional(String()),
 });
-export const usersResponse = Type.Array(userResponse);
+export const usersResponse = Array(userResponse);
