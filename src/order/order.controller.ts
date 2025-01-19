@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyRequest } from "fastify";
 
 import {
   getOrders,
@@ -7,49 +7,19 @@ import {
   deleteOrder,
   createOrder,
 } from "./order.service";
+
 import {
-  CreateOrderInput,
-  GetOrderInput,
-  UpdateOrderInput,
+  CreateOrderRequestBody,
+  GetOrderParams,
+  UpdateOrderRequestBody,
 } from "./order.schema";
 
-import db from "../db";
-import { OrderDirection } from "@prisma/client";
-
 export async function createOrderHandler(
-  req: FastifyRequest<{ Body: CreateOrderInput }>,
-  rep: FastifyReply,
+  req: FastifyRequest<{ Body: CreateOrderRequestBody }>,
 ) {
-  const order = req.body;
+  const { symbolId, ...orderInput } = req.body;
 
-  if (req.body.direction === "SELL") {
-    const sharesBeingSoldAgg = await db.order.aggregate({
-      _sum: {
-        shares: true,
-      },
-      where: {
-        userId: req.user.id,
-        filled: false,
-        symbol: order.symbol,
-        direction: OrderDirection.SELL,
-      },
-    });
-
-    const holding = await db.holding.findUniqueOrThrow({
-      where: { userId_symbol: { symbol: order.symbol, userId: req.user.id } },
-    });
-
-    if (
-      holding.shares.lessThan(
-        sharesBeingSoldAgg._sum.shares
-          ? sharesBeingSoldAgg._sum.shares.add(order.shares)
-          : order.shares,
-      )
-    )
-      return rep.code(400).send("Insufficient shares in holding");
-  }
-
-  return await createOrder(order, req.user);
+  return await createOrder(orderInput, req.user.id, symbolId);
 }
 
 export async function getOrdersHandler() {
@@ -57,21 +27,21 @@ export async function getOrdersHandler() {
 }
 
 export async function getOrderHandler(
-  req: FastifyRequest<{ Params: GetOrderInput }>,
+  req: FastifyRequest<{ Params: GetOrderParams }>,
 ) {
-  return await getOrder(req.params.order_id);
+  return await getOrder(req.params.orderId);
 }
 
 export async function updateOrderHandler(
-  req: FastifyRequest<{ Params: GetOrderInput; Body: UpdateOrderInput }>,
+  req: FastifyRequest<{ Params: GetOrderParams; Body: UpdateOrderRequestBody }>,
 ) {
-  return await updateOrder(req.params.order_id, req.body);
+  return await updateOrder(req.params.orderId, req.body);
 }
 
 export async function deleteOrderHandler(
-  req: FastifyRequest<{ Params: GetOrderInput }>,
+  req: FastifyRequest<{ Params: GetOrderParams }>,
 ) {
-  const id = req.params.order_id;
+  const id = req.params.orderId;
   await deleteOrder(id);
   return id;
 }

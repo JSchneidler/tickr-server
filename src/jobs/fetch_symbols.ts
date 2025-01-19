@@ -1,13 +1,8 @@
-import {
-  getCryptoExchanges,
-  getCryptoSymbols,
-  getStockSymbols,
-} from "../stocks/finnhub_api";
+import { getStockSymbols } from "../stocks/finnhub_api";
 import db from "../db";
 
 import "../env";
-import { SymbolType } from "@prisma/client";
-import { UpdateSymbolInput } from "../symbol/symbol.schema";
+import { Prisma, SymbolType } from "@prisma/client";
 
 async function fetchStockSymbols() {
   const symbols = await getStockSymbols();
@@ -73,7 +68,7 @@ async function fetchCryptoSymbols() {
   for (const symbol of CRYPTO_SYMBOLS) {
     count++;
 
-    const updates: UpdateSymbolInput = {
+    const updates: Prisma.SymbolUpdateInput = {
       displayName: symbol.displayName,
       description: symbol.description,
       type: SymbolType.CRYPTO,
@@ -82,7 +77,7 @@ async function fetchCryptoSymbols() {
       where: { name_type: { name: symbol.name, type: SymbolType.CRYPTO } },
       update: updates,
       create: {
-        ...updates,
+        ...(updates as Prisma.SymbolCreateInput),
         name: symbol.name,
       },
     });

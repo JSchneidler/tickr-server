@@ -12,18 +12,18 @@ import tokenRoutes from "../token/token.routes";
 import holdingRoutes from "../holding/holding.routes";
 import orderRoutes from "../order/order.routes";
 
-import {
-  usersResponseSchema,
-  userResponseSchema,
-  getUserSchema,
-  updateUserSchema,
-} from "./user.schema";
 import { errorResponseSchemas } from "../error_responses.schema";
+import {
+  getUserParams,
+  updateUserRequestBody,
+  usersResponse,
+  userResponse,
+} from "./user.schema";
 
 export default async function (f: FastifyInstance) {
-  await f.register(tokenRoutes, { prefix: "/:user_id/tokens" });
-  await f.register(holdingRoutes, { prefix: "/:user_id/holdings" });
-  await f.register(orderRoutes, { prefix: "/:user_id/orders" });
+  await f.register(tokenRoutes, { prefix: "/:userId/tokens" });
+  await f.register(holdingRoutes, { prefix: "/:userId/holdings" });
+  await f.register(orderRoutes, { prefix: "/:userId/orders" });
 
   f.get(
     "/",
@@ -32,7 +32,7 @@ export default async function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: usersResponseSchema,
+          200: usersResponse,
         },
       },
     },
@@ -40,14 +40,14 @@ export default async function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:user_id",
+    "/:userId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getUserSchema,
+        params: getUserParams,
         response: {
           ...errorResponseSchemas,
-          200: userResponseSchema,
+          200: userResponse,
         },
       },
     },
@@ -55,15 +55,15 @@ export default async function (f: FastifyInstance) {
   );
 
   f.put(
-    "/:user_id",
+    "/:userId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getUserSchema,
-        body: updateUserSchema,
+        params: getUserParams,
+        body: updateUserRequestBody,
         response: {
           ...errorResponseSchemas,
-          200: userResponseSchema,
+          200: userResponse,
         },
       },
     },
@@ -71,11 +71,11 @@ export default async function (f: FastifyInstance) {
   );
 
   f.delete(
-    "/:user_id",
+    "/:userId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getUserSchema,
+        params: getUserParams,
         response: {
           ...errorResponseSchemas,
           200: Type.Number(),

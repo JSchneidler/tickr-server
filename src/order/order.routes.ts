@@ -11,9 +11,9 @@ import {
   deleteOrderHandler,
 } from "./order.controller";
 import {
-  createOrderSchema,
-  ordersResponseSchema,
-  orderResponseSchema,
+  createOrderRequestBody,
+  orderResponse,
+  ordersResponse,
 } from "./order.schema";
 
 export default function (f: FastifyInstance) {
@@ -22,10 +22,10 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        body: createOrderSchema,
+        body: createOrderRequestBody,
         response: {
           ...errorResponseSchemas,
-          201: orderResponseSchema,
+          201: orderResponse,
         },
       },
     },
@@ -38,7 +38,7 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: ordersResponseSchema,
+          200: ordersResponse,
         },
       },
     },
@@ -46,15 +46,15 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:order_id",
+    "/:orderId",
     {
       schema: {
         params: Type.Object({
-          order_id: Type.Number(),
+          orderId: Type.Number(),
         }),
         response: {
           ...errorResponseSchemas,
-          200: orderResponseSchema,
+          200: orderResponse,
         },
       },
     },
@@ -62,17 +62,17 @@ export default function (f: FastifyInstance) {
   );
 
   f.put(
-    "/:order_id",
+    "/:orderId",
     {
       onRequest: [f.authenticate],
       schema: {
         params: Type.Object({
-          order_id: Type.Number(),
+          orderId: Type.Number(),
         }),
         body: Type.Object({}),
         response: {
           ...errorResponseSchemas,
-          200: orderResponseSchema,
+          200: orderResponse,
         },
       },
     },
@@ -80,16 +80,16 @@ export default function (f: FastifyInstance) {
   );
 
   f.delete(
-    "/:order_id",
+    "/:orderId",
     {
       onRequest: [f.authenticate],
       schema: {
         params: Type.Object({
-          order_id: Type.Number(),
+          orderId: Type.Number(),
         }),
         response: {
           ...errorResponseSchemas,
-          200: orderResponseSchema,
+          200: Type.Number(),
         },
       },
     },

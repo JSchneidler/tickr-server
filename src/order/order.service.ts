@@ -1,19 +1,54 @@
+import { OrderDirection, Prisma } from "@prisma/client";
+
 import db from "../db";
 import tradeEngine from "../tradeEngine";
-import { UserWithoutSensitive } from "../user/user.schema";
-import { CreateOrderInput, UpdateOrderInput } from "./order.schema";
+import { OrderCreateInput } from "./order.schema";
+import { getSymbol } from "../symbol/symbol.service";
 
 export async function createOrder(
-  data: CreateOrderInput,
-  user: UserWithoutSensitive,
+  orderInput: OrderCreateInput,
+  userId: number,
+  symbolId: number,
 ) {
-  if (!(await db.symbol.findFirst({ where: { name: data.symbol } })))
-    throw Error("Symbol not found in DB");
+  const symbol = await getSymbol(symbolId);
 
-  const order = await db.order.create({ data: { ...data, userId: user.id } });
+  if (orderInput.direction === OrderDirection.SELL) {
+    const sharesBeingSoldAgg = await db.order.aggregate({
+      _sum: {
+        shares: true,
+      },
+      where: {
+        userId,
+        symbolId: symbol.id,
+        filled: false,
+        direction: OrderDirection.SELL,
+      },
+    });
 
-  // @ts-expect-error: Decimal is assignable to number
-  tradeEngine.addOrder(order);
+    const holding = await db.holding.findUniqueOrThrow({
+      where: { userId_symbolId: { userId, symbolId: symbol.id } },
+    });
+
+    if (
+      holding.shares.lessThan(
+        sharesBeingSoldAgg._sum.shares
+          ? sharesBeingSoldAgg._sum.shares.add(orderInput.shares)
+          : new Prisma.Decimal(orderInput.shares),
+      )
+    )
+      throw Error("Insufficient shares in holding");
+  }
+
+  // return await createOrder(order, req.user);
+  const order = await db.order.create({
+    data: {
+      ...orderInput,
+      User: { connect: { id: userId } },
+      Symbol: { connect: { id: symbol.id } },
+    },
+  });
+
+  tradeEngine.addOrder(order, symbol);
 
   return order;
 }
@@ -26,12 +61,16 @@ export async function getOrder(id: number) {
   return await db.order.findUniqueOrThrow({ where: { id } });
 }
 
-export async function updateOrder(id: number, data: UpdateOrderInput) {
+export async function updateOrder(id: number, data: Prisma.OrderUpdateInput) {
   return await db.order.update({ where: { id }, data });
 }
 
 export async function deleteOrder(id: number) {
-  await db.order.delete({ where: { id } });
+  const order = await db.order.delete({ where: { id } });
+
+  const symbol = await getSymbol(order.symbolId);
+  tradeEngine.removeOrder(order, symbol);
+
   return id;
 }
 

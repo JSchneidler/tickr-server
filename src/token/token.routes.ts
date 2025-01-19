@@ -1,12 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { Type } from "@sinclair/typebox";
 
-import {
-  tokenResponseSchema,
-  tokensResponseSchema,
-  createTokenSchema,
-  getTokenSchema,
-} from "./token.schema";
 import { errorResponseSchemas } from "../error_responses.schema";
 
 import {
@@ -15,16 +9,22 @@ import {
   getTokenHandler,
   revokeTokenHandler,
 } from "./token.controller";
+import {
+  createTokenRequestBody,
+  getTokenParams,
+  tokenResponse,
+  tokensResponse,
+} from "./token.schema";
 
 export default function (f: FastifyInstance) {
   f.post(
     "/",
     {
       schema: {
-        body: createTokenSchema,
+        body: createTokenRequestBody,
         response: {
           ...errorResponseSchemas,
-          201: tokenResponseSchema,
+          201: tokenResponse,
         },
       },
     },
@@ -37,7 +37,7 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: tokensResponseSchema,
+          200: tokensResponse,
         },
       },
     },
@@ -45,13 +45,13 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:token_id",
+    "/:tokenId",
     {
       schema: {
-        params: getTokenSchema,
+        params: getTokenParams,
         response: {
           ...errorResponseSchemas,
-          200: tokensResponseSchema,
+          200: tokensResponse,
         },
       },
     },
@@ -59,10 +59,10 @@ export default function (f: FastifyInstance) {
   );
 
   f.delete(
-    "/:token_id",
+    "/:tokenId",
     {
       schema: {
-        params: getTokenSchema,
+        params: getTokenParams,
         response: {
           ...errorResponseSchemas,
           200: Type.Number(),

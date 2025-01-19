@@ -6,5 +6,8 @@ export default new PrismaClient({
       password_hash: true,
       salt: true,
     },
+    accessToken: {
+      token_hash: true,
+    },
   },
 });

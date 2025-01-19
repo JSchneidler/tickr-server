@@ -1,28 +1,38 @@
-import { FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 import { getUsers, getUser, updateUser, deleteUser } from "./user.service";
-import { GetUserInput, UpdateUserInput } from "./user.schema";
+import { GetUserParams, UserUpdateInput } from "./user.schema";
+import { Role } from "@prisma/client";
 
 export async function getUsersHandler() {
   return await getUsers();
 }
 
 export async function getUserHandler(
-  req: FastifyRequest<{ Params: GetUserInput }>,
+  req: FastifyRequest<{ Params: GetUserParams }>,
+  rep: FastifyReply,
 ) {
-  return await getUser(req.params.user_id);
+  if (req.user.id === req.params.userId || req.user.role === Role.ADMIN)
+    return await getUser(req.params.userId);
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function updateUserHandler(
-  req: FastifyRequest<{ Params: GetUserInput; Body: UpdateUserInput }>,
+  req: FastifyRequest<{ Params: GetUserParams; Body: UserUpdateInput }>,
+  rep: FastifyReply,
 ) {
-  return await updateUser(req.params.user_id, req.body);
+  if (req.user.id === req.params.userId || req.user.role === Role.ADMIN)
+    return await updateUser(req.params.userId, req.body);
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function deleteUserHandler(
-  req: FastifyRequest<{ Params: GetUserInput }>,
+  req: FastifyRequest<{ Params: GetUserParams }>,
+  rep: FastifyReply,
 ) {
-  const id = req.params.user_id;
-  await deleteUser(id);
-  return id;
+  const id = req.params.userId;
+  if (req.user.id === id || req.user.role === Role.ADMIN) {
+    await deleteUser(id);
+    return id;
+  } else rep.code(403).send("Insufficient permission");
 }

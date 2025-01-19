@@ -8,11 +8,10 @@ import {
   searchSymbolsHandler,
 } from "./symbol.controller";
 import {
-  fullSymbolResponseSchema,
-  getSymbolSchema,
-  searchSymbolsSchema,
-  symbolResponseSchema,
-  symbolsResponseSchema,
+  fullSymbolResponse,
+  getSymbolParams,
+  searchSymbolsParams,
+  symbolsResponse,
 } from "./symbol.schema";
 
 export default function (f: FastifyInstance) {
@@ -22,7 +21,7 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: symbolsResponseSchema,
+          200: symbolsResponse,
         },
       },
     },
@@ -30,13 +29,13 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:type/:name",
+    "/:symbolId",
     {
       schema: {
-        params: getSymbolSchema,
+        params: getSymbolParams,
         response: {
           ...errorResponseSchemas,
-          200: fullSymbolResponseSchema,
+          200: fullSymbolResponse,
         },
       },
     },
@@ -47,10 +46,10 @@ export default function (f: FastifyInstance) {
     "/search/:text",
     {
       schema: {
-        params: searchSymbolsSchema,
+        params: searchSymbolsParams,
         response: {
           ...errorResponseSchemas,
-          200: symbolsResponseSchema,
+          200: symbolsResponse,
         },
       },
     },

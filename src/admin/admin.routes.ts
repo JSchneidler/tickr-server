@@ -9,11 +9,11 @@
 
 // export default function (f: FastifyTypeBox) {
 //   f.get(
-//     "/ban/:user_id",
+//     "/ban/:userId",
 //     {
 //       schema: {
 //         params: Type.Object({
-//           user_id: Type.Number(),
+//           userId: Type.Number(),
 //         }),
 //         response: {
 //           ...ERROR_RESPONSE_SCHEMAS,
@@ -22,16 +22,16 @@
 //       },
 //     },
 //     (req) => {
-//       banUser(req.params.user_id);
+//       banUser(req.params.userId);
 //     }
 //   );
 
 //   f.get(
-//     "/holdings/:user_id",
+//     "/holdings/:userId",
 //     {
 //       schema: {
 //         params: Type.Object({
-//           user_id: Type.Number(),
+//           userId: Type.Number(),
 //         }),
 //         response: {
 //           ...ERROR_RESPONSE_SCHEMAS,
@@ -40,7 +40,7 @@
 //       },
 //     },
 //     (req) => {
-//       getHoldingsForUser(req.params.user_id);
+//       getHoldingsForUser(req.params.userId);
 //     }
 //   );
 // }

@@ -1,22 +1,34 @@
+import { Prisma } from "@prisma/client";
 import { Type, type Static } from "@sinclair/typebox";
+import { userId } from "../user/user.schema";
 
-const tokenCore = {
-  name: Type.String(),
-};
-export const createTokenSchema = Type.Object(tokenCore);
-export type CreateTokenInput = Static<typeof createTokenSchema>;
+// Prisma
+export type TokenWithoutSensitive = Prisma.AccessTokenGetPayload<{
+  omit: { token_hash: true };
+}>;
 
-export const tokenResponseSchema = Type.Object({
-  ...tokenCore,
-  id: Type.Number(),
-  userId: Type.Number(),
-  createdAt: Type.String(),
-  revokedAt: Type.Optional(Type.String()),
+export interface CreateToken {
+  accessToken: TokenWithoutSensitive;
+  token: string;
+}
+
+// API
+const tokenId = Type.Number();
+export const getTokenParams = Type.Object({
+  tokenId,
 });
-export type TokenResponse = Static<typeof tokenResponseSchema>;
+export type GetTokenParams = Static<typeof getTokenParams>;
 
-export const tokensResponseSchema = Type.Array(tokenResponseSchema);
-export type TokensResponse = Static<typeof tokensResponseSchema>;
+export const createTokenRequestBody = Type.Object({
+  name: Type.String({ minLength: 1 }),
+});
+export type CreateTokenRequestBody = Static<typeof createTokenRequestBody>;
 
-export const getTokenSchema = Type.Object({ token_id: Type.Number() });
-export type GetTokenInput = Static<typeof getTokenSchema>;
+export const tokenResponse = Type.Object({
+  ...createTokenRequestBody.properties,
+  id: tokenId,
+  userId: userId,
+  createdAt: Type.String(),
+  revokedAt: Type.Union([Type.String(), Type.Null()]),
+});
+export const tokensResponse = Type.Array(tokenResponse);

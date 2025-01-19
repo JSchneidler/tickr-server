@@ -1,37 +1,25 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
-import { CreateUserInput, LoginInput } from "../user/user.schema";
 import { createUser } from "../user/user.service";
-import db from "../db";
-import { comparePasswordHash } from ".";
-import { createToken } from "../token/token.service";
+import { CreateUserRequestBody, UserCreateInput } from "../user/user.schema";
+import { LoginRequestBody } from "./auth.schema";
+import { login } from "./auth.service";
 
 export async function registerHandler(
-  req: FastifyRequest<{ Body: CreateUserInput }>,
+  req: FastifyRequest<{ Body: CreateUserRequestBody }>,
 ) {
-  return await createUser(req.body);
+  const user: UserCreateInput = req.body;
+  return await createUser(user);
 }
 
 export async function loginHandler(
-  req: FastifyRequest<{ Body: LoginInput }>,
+  req: FastifyRequest<{ Body: LoginRequestBody }>,
   rep: FastifyReply,
 ) {
-  const user = await db.user.findUniqueOrThrow({
-    where: { email: req.body.email },
-    omit: { password_hash: false, salt: false },
-  });
-
-  if (
-    await comparePasswordHash(
-      Buffer.from(req.body.password),
-      user.salt,
-      user.password_hash,
-    )
-  ) {
-    const { token } = await createToken("login", user);
-    return {
-      user,
-      token,
-    };
-  } else rep.code(401).send("Unauthorized");
+  try {
+    return await login(req.body.email, req.body.password);
+  } catch (error) {
+    console.error(error);
+    rep.code(401).send("Unauthorized");
+  }
 }

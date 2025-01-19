@@ -1,13 +1,19 @@
+import { Prisma } from "@prisma/client";
+
 import db from "../db";
 import { UserWithoutSensitive } from "../user/user.schema";
-import { CreateHoldingInput, UpdateHoldingInput } from "./holding.schema";
 
 export async function createHolding(
-  data: CreateHoldingInput,
+  holdingInput: Prisma.HoldingCreateInput,
   user: UserWithoutSensitive,
+  symbolId: number,
 ) {
   return await db.holding.create({
-    data: { ...data, userId: user.id },
+    data: {
+      ...holdingInput,
+      User: { connect: { id: user.id } },
+      Symbol: { connect: { id: symbolId } },
+    },
   });
 }
 
@@ -19,8 +25,11 @@ export async function getHolding(id: number) {
   return await db.holding.findUniqueOrThrow({ where: { id } });
 }
 
-export async function updateHolding(id: number, data: UpdateHoldingInput) {
-  return await db.holding.update({ where: { id }, data });
+export async function updateHolding(
+  id: number,
+  holdingUpdates: Prisma.HoldingUpdateInput,
+) {
+  return await db.holding.update({ where: { id }, data: holdingUpdates });
 }
 
 export async function deleteHolding(id: number) {

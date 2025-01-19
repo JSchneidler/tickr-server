@@ -1,23 +1,31 @@
 import db from "../db";
-import { CreateUserInput, UpdateUserInput } from "./user.schema";
 import { hashPassword } from "../auth";
 import { createToken } from "../token/token.service";
+import { UserWithToken } from "../auth/auth.schema";
+import {
+  UserWithoutSensitive,
+  UserCreateInput,
+  UserUpdateInput,
+} from "./user.schema";
 
-// TODO: Get from DB based on mode
+// TODO: Get from DB based on mode?
 const DEFAULT_BALANCE = 100000;
 
-export async function createUser(data: CreateUserInput) {
-  const password_hash = await hashPassword(data.password);
+export async function createUser(
+  userInput: UserCreateInput,
+): Promise<UserWithToken> {
+  const { hash, salt } = await hashPassword(userInput.password);
 
   // TODO: Make user+key creation into transaction
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...rest } = userInput;
   const user = await db.user.create({
     data: {
-      name: data.name,
-      email: data.email,
+      ...rest,
       balance: DEFAULT_BALANCE,
       deposits: DEFAULT_BALANCE,
-      password_hash: password_hash.hash,
-      salt: password_hash.salt,
+      password_hash: hash,
+      salt,
     },
   });
 
@@ -26,26 +34,34 @@ export async function createUser(data: CreateUserInput) {
   return { user, token };
 }
 
-export async function getUsers() {
+export async function getUsers(): Promise<UserWithoutSensitive[]> {
   return await db.user.findMany();
 }
 
-export async function getUser(id: number) {
+export async function getUser(id: number): Promise<UserWithoutSensitive> {
   return await db.user.findUniqueOrThrow({ where: { id } });
 }
 
-export async function updateUser(id: number, data: UpdateUserInput) {
-  return await db.user.update({ where: { id }, data });
+export async function updateUser(
+  id: number,
+  userUpdates: UserUpdateInput,
+): Promise<UserWithoutSensitive> {
+  if (userUpdates.password) {
+    const { hash, salt } = await hashPassword(userUpdates.password);
+    userUpdates.password_hash = hash;
+    userUpdates.salt = salt;
+  }
+
+  return await db.user.update({ where: { id }, data: userUpdates });
 }
 
-export async function deleteUser(id: number) {
+export async function deleteUser(id: number): Promise<void> {
   await db.user.delete({ where: { id } });
-  return id;
 }
 
 export default {
   createUser,
-  getUsers,
+  // getUsers,
   getUser,
   updateUser,
   deleteUser,

@@ -1,10 +1,10 @@
 import { FastifyRequest } from "fastify";
 
 import { createToken, getToken, getTokens, revokeToken } from "./token.service";
-import { CreateTokenInput, GetTokenInput } from "./token.schema";
+import { CreateTokenRequestBody, GetTokenParams } from "./token.schema";
 
 export async function createTokenHandler(
-  req: FastifyRequest<{ Body: CreateTokenInput }>,
+  req: FastifyRequest<{ Body: CreateTokenRequestBody }>,
 ) {
   const token = await createToken(req.body.name, req.user);
 
@@ -16,13 +16,13 @@ export async function getTokensHandler() {
 }
 
 export async function getTokenHandler(
-  req: FastifyRequest<{ Params: GetTokenInput }>,
+  req: FastifyRequest<{ Params: GetTokenParams }>,
 ) {
-  return await getToken(req.params.token_id);
+  return await getToken(req.params.tokenId);
 }
 
 export async function revokeTokenHandler(
-  req: FastifyRequest<{ Params: GetTokenInput }>,
-) {
-  return await revokeToken(req.params.token_id);
+  req: FastifyRequest<{ Params: GetTokenParams }>,
+): Promise<void> {
+  await revokeToken(req.params.tokenId);
 }

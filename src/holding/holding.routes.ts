@@ -1,12 +1,11 @@
 import { FastifyInstance } from "fastify";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-
 import { getHoldingsHandler, getHoldingHandler } from "./holding.controller";
 import {
-  getHoldingSchema,
-  holdingResponseSchema,
-  holdingsResponseSchema,
+  getHoldingParams,
+  holdingResponse,
+  holdingsResponse,
 } from "./holding.schema";
 
 export default function (f: FastifyInstance) {
@@ -16,7 +15,7 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: holdingsResponseSchema,
+          200: holdingsResponse,
         },
       },
     },
@@ -24,13 +23,13 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:holding_id",
+    "/:holdingId",
     {
       schema: {
-        params: getHoldingSchema,
+        params: getHoldingParams,
         response: {
           ...errorResponseSchemas,
-          200: holdingResponseSchema,
+          200: holdingResponse,
         },
       },
     },

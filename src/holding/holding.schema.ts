@@ -1,28 +1,21 @@
-import { Static, Type } from "@sinclair/typebox";
+import { Type, type Static } from "@sinclair/typebox";
+import { userId } from "../user/user.schema";
+import { symbolId } from "../symbol/symbol.schema";
 
-const holdingCore = {
-  symbol: Type.String(),
-  shares: Type.Number(),
-};
+// API
+export const holdingId = Type.Number();
 
-export const holdingResponseSchema = Type.Object({
-  ...holdingCore,
-  id: Type.Number(),
-  userId: Type.Number(),
+export const getHoldingParams = Type.Object({
+  holdingId,
+});
+export type GetHoldingParams = Static<typeof getHoldingParams>;
+
+export const holdingResponse = Type.Object({
+  id: holdingId,
+  userId,
+  symbolId,
   createdAt: Type.String(),
   updatedAt: Type.String(),
   deletedAt: Type.Union([Type.String(), Type.Null()]),
 });
-export type HoldingResponse = Static<typeof holdingResponseSchema>;
-
-export const holdingsResponseSchema = Type.Array(holdingResponseSchema);
-export type HoldingsResponse = Static<typeof holdingsResponseSchema>;
-
-export const createHoldingSchema = Type.Object(holdingCore);
-export type CreateHoldingInput = Static<typeof createHoldingSchema>;
-
-export const getHoldingSchema = Type.Object({ holding_id: Type.Number() });
-export type GetHoldingInput = Static<typeof getHoldingSchema>;
-
-export const updateHoldingSchema = Type.Omit(createHoldingSchema, ["symbol"]);
-export type UpdateHoldingInput = Static<typeof updateHoldingSchema>;
+export const holdingsResponse = Type.Array(holdingResponse);

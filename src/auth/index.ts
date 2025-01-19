@@ -21,7 +21,7 @@ declare module "fastify" {
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
-    user?: UserWithoutSensitive; // TODO: Populate req.user with proper model
+    user?: UserWithoutSensitive;
   }
 }
 

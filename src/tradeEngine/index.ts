@@ -1,12 +1,16 @@
-import { OrderResponse } from "../order/order.schema";
-
 import db from "../db";
 import tradeFeed, { TradesSummary, UnSubFn } from "../stocks/tradeFeed";
 import { getUser } from "../user/user.service";
-import { OrderDirection, OrderType } from "@prisma/client";
+import {
+  Order,
+  OrderDirection,
+  OrderType,
+  Prisma,
+  Symbol,
+} from "@prisma/client";
 
 interface Subscription {
-  orders: OrderResponse[];
+  orders: Order[];
   unsubscribe: UnSubFn;
 }
 
@@ -14,85 +18,95 @@ class TradeEngine {
   private orders = new Map<string, Subscription>();
 
   async start() {
-    const orders = await db.order.findMany({ where: { filled: false } });
+    const orders = await db.order.findMany({
+      where: { filled: false },
+      include: { Symbol: true },
+    });
 
-    // @ts-expect-error: Date is assignable to string
-    for (const order of orders) this.addOrder(order);
+    for (const order of orders) this.addOrder(order, order.Symbol);
   }
 
-  addOrder(order: OrderResponse) {
-    const symbol = order.symbol;
-    if (this.orders.has(symbol)) {
-      this.orders.get(symbol).orders.push(order);
+  addOrder(order: Order, symbol: Symbol) {
+    if (this.orders.has(symbol.name)) {
+      this.orders.get(symbol.name).orders.push(order);
     } else {
-      this.orders.set(symbol, {
+      this.orders.set(symbol.name, {
         orders: [order],
-        unsubscribe: tradeFeed.subscribe(symbol, async (summary) => {
+        unsubscribe: tradeFeed.subscribe(symbol.name, async (summary) => {
           await this.processOrders(symbol, summary);
         }),
       });
     }
     console.log(
-      `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${order.symbol}`,
+      `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${symbol.name}`,
     );
   }
 
-  removeOrder(order: OrderResponse) {
-    const subscription = this.orders.get(order.symbol);
+  removeOrder(order: Order, symbol: Symbol) {
+    const subscription = this.orders.get(symbol.name);
     subscription.orders = this.orders
-      .get(order.symbol)
+      .get(symbol.name)
       ?.orders.filter((o) => o.id !== order.id);
 
     if (subscription.orders.length === 0) {
       subscription.unsubscribe();
-      this.orders.delete(order.symbol);
+      this.orders.delete(symbol.name);
     }
   }
 
-  async processOrders(symbol: string, summary: TradesSummary) {
+  async processOrders(symbol: Symbol, summary: TradesSummary) {
     // console.log(
     //   `${this.orders.get(symbol).orders.length.toString()} ${symbol} orders queued`
     // );
 
-    const orders = this.orders.get(symbol).orders;
+    const orders = this.orders.get(symbol.name).orders;
 
     await Promise.all([
       this.processMarketOrders(
         orders.filter((order) => order.type === OrderType.MARKET),
+        symbol,
         summary,
       ),
       this.processLimitOrders(
         orders.filter((order) => order.type === OrderType.LIMIT),
+        symbol,
         summary,
       ),
       this.processStopOrders(
         orders.filter((order) => order.type === OrderType.STOP),
+        symbol,
         summary,
       ),
       this.processTrailingStopOrders(
         orders.filter((order) => order.type === OrderType.TRAILING_STOP),
+        symbol,
         summary,
       ),
     ]);
   }
 
   private async fillOrder(
-    order: OrderResponse,
-    sharePrice: number,
-    totalPrice: number,
+    order: Order,
+    symbol: Symbol,
+    sharePrice: Prisma.Decimal,
+    totalPrice: Prisma.Decimal,
   ) {
-    this.removeOrder(order);
+    this.removeOrder(order, symbol);
     await db.order.update({
       where: { id: order.id },
       data: { filled: true, sharePrice, totalPrice },
     });
     console.log(
-      `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${order.symbol}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`,
+      `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${symbol.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`,
     );
   }
 
-  private async fillBuyOrder(order: OrderResponse, price: number) {
-    const cost = order.shares * price;
+  private async fillBuyOrder(
+    order: Order,
+    symbol: Symbol,
+    price: Prisma.Decimal,
+  ) {
+    const cost = order.shares.mul(price);
     const user = await getUser(order.userId);
     if (user.balance.lessThan(cost)) {
       // TODO: Alert user order cannot be filled and/or partially fill
@@ -103,10 +117,10 @@ class TradeEngine {
       return;
     }
 
-    await this.fillOrder(order, price, cost);
+    await this.fillOrder(order, symbol, price, cost);
 
-    const where = {
-      userId_symbol: { userId: order.userId, symbol: order.symbol },
+    const where: Prisma.HoldingWhereUniqueInput = {
+      userId_symbolId: { userId: order.userId, symbolId: order.symbolId },
     };
     const holding = await db.holding.findUnique({
       where,
@@ -117,7 +131,7 @@ class TradeEngine {
     };
     await db.holding.upsert({
       where,
-      create: { ...shares, symbol: order.symbol, userId: order.userId },
+      create: { ...shares, symbolId: symbol.id, userId: order.userId },
       update: shares,
     });
 
@@ -127,14 +141,18 @@ class TradeEngine {
     });
   }
 
-  private async fillSellOrder(order: OrderResponse, price: number) {
-    const cost = order.shares * price;
+  private async fillSellOrder(
+    order: Order,
+    symbol: Symbol,
+    price: Prisma.Decimal,
+  ) {
+    const cost = order.shares.mul(price);
 
     const holding = await db.holding.findFirstOrThrow({
-      where: { symbol: order.symbol },
+      where: { symbolId: order.symbolId },
     });
 
-    await this.fillOrder(order, price, cost);
+    await this.fillOrder(order, symbol, price, cost);
 
     if (holding.shares.equals(order.shares))
       await db.holding.delete({ where: { id: holding.id } });
@@ -151,30 +169,43 @@ class TradeEngine {
     });
   }
 
-  async processMarketOrders(orders: OrderResponse[], summary: TradesSummary) {
+  async processMarketOrders(
+    orders: Order[],
+    symbol: Symbol,
+    summary: TradesSummary,
+  ) {
     if (orders.length === 0) return;
 
-    const fillPrice = (summary.high + summary.low) / 2;
+    const fillPrice = summary.high.add(summary.low).div(2);
 
     for (const order of orders) {
       switch (order.direction) {
         case OrderDirection.BUY:
-          await this.fillBuyOrder(order, fillPrice);
+          await this.fillBuyOrder(order, symbol, fillPrice);
           break;
         case OrderDirection.SELL:
-          await this.fillSellOrder(order, fillPrice);
+          await this.fillSellOrder(order, symbol, fillPrice);
           break;
       }
     }
   }
-  async processLimitOrders(orders: OrderResponse[], summary: TradesSummary) {
+  async processLimitOrders(
+    orders: Order[],
+    symbol: Symbol,
+    summary: TradesSummary,
+  ) {
     if (orders.length === 0) return;
   }
-  async processStopOrders(orders: OrderResponse[], summary: TradesSummary) {
+  async processStopOrders(
+    orders: Order[],
+    symbol: Symbol,
+    summary: TradesSummary,
+  ) {
     if (orders.length === 0) return;
   }
   async processTrailingStopOrders(
-    orders: OrderResponse[],
+    orders: Order[],
+    symbol: Symbol,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;

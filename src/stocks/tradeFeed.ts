@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 
 import env from "../env";
+import { Prisma } from "@prisma/client";
 
 interface Trade {
   c: number[] | undefined; // Trade conditions
@@ -24,8 +25,8 @@ type TradeListener = (summary: TradesSummary) => void | Promise<void>;
 export type UnSubFn = () => void;
 
 export interface TradesSummary {
-  high: number;
-  low: number;
+  high: Prisma.Decimal;
+  low: Prisma.Decimal;
 }
 
 const FINNHUB_WEBSOCKET_URL = "wss://ws.finnhub.io";
@@ -57,12 +58,14 @@ class TradeFeed {
           for (const trade of tradesMessage.data) {
             if (this.tradesSummaries.has(trade.s)) {
               const summary = this.tradesSummaries.get(trade.s);
-              if (trade.p < summary.low) summary.low = trade.p;
-              else if (trade.p > summary.high) summary.high = trade.p;
+              if (summary.low.greaterThan(trade.p))
+                summary.low = new Prisma.Decimal(trade.p);
+              else if (summary.high.lessThan(trade.p))
+                summary.high = new Prisma.Decimal(trade.p);
             } else
               this.tradesSummaries.set(trade.s, {
-                high: trade.p,
-                low: trade.p,
+                high: new Prisma.Decimal(trade.p),
+                low: new Prisma.Decimal(trade.p),
               });
           }
         }

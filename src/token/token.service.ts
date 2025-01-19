@@ -1,43 +1,40 @@
 import db from "../db";
-import { CreateTokenInput } from "./token.schema";
-import { generateJwt } from "../auth";
+import { CreateToken, TokenWithoutSensitive } from "./token.schema";
 import { UserWithoutSensitive } from "../user/user.schema";
 
-export async function createToken(name: string, user: UserWithoutSensitive) {
+import { generateJwt } from "../auth";
+
+export async function createToken(
+  name: string,
+  user: UserWithoutSensitive,
+): Promise<CreateToken> {
   const { token, hash } = await generateJwt(user);
 
-  const access_token = await db.accessToken.create({
-    data: { name, token_hash: hash, userId: user.id },
+  const accessToken = await db.accessToken.create({
+    data: { name, token_hash: hash, User: { connect: { id: user.id } } },
   });
 
   return {
-    id: access_token.id,
-    name: access_token.name,
     token,
+    accessToken,
   };
 }
 
-export async function getTokens() {
+export async function getTokens(): Promise<TokenWithoutSensitive[]> {
   return await db.accessToken.findMany();
 }
 
-export async function getToken(id: number) {
+export async function getToken(id: number): Promise<TokenWithoutSensitive> {
   return await db.accessToken.findUniqueOrThrow({ where: { id } });
 }
 
-export async function updateToken(id: number, data: CreateTokenInput) {
-  return await db.accessToken.update({ where: { id }, data });
-}
-
-export async function revokeToken(id: number) {
+export async function revokeToken(id: number): Promise<void> {
   await db.accessToken.delete({ where: { id } });
-  return id;
 }
 
 export default {
   createToken,
   getTokens,
   getToken,
-  updateToken,
   revokeToken,
 };

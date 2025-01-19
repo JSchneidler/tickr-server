@@ -1,23 +1,19 @@
 import { FastifyInstance } from "fastify";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-import {
-  createUserSchema,
-  loginResponseSchema,
-  loginSchema,
-  userResponseSchema,
-} from "../user/user.schema";
 import { registerHandler, loginHandler } from "./auth.controller";
+import { createUserRequestBody, userResponse } from "../user/user.schema";
+import { loginRequestBody, loginResponse } from "./auth.schema";
 
 export default function (f: FastifyInstance) {
   f.post(
     "/register",
     {
       schema: {
-        body: createUserSchema,
+        body: createUserRequestBody,
         response: {
           ...errorResponseSchemas,
-          201: loginResponseSchema,
+          201: loginResponse,
         },
       },
     },
@@ -28,10 +24,10 @@ export default function (f: FastifyInstance) {
     "/login",
     {
       schema: {
-        body: loginSchema,
+        body: loginRequestBody,
         response: {
           ...errorResponseSchemas,
-          200: loginResponseSchema,
+          200: loginResponse,
         },
       },
     },
@@ -45,7 +41,7 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: userResponseSchema,
+          200: userResponse,
         },
       },
     },
