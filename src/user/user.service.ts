@@ -58,11 +58,3 @@ export async function updateUser(
 export async function deleteUser(id: number): Promise<void> {
   await db.user.delete({ where: { id } });
 }
-
-export default {
-  createUser,
-  // getUsers,
-  getUser,
-  updateUser,
-  deleteUser,
-};

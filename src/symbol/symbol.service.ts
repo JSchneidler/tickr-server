@@ -6,7 +6,7 @@ import { FullSymbolResponse } from "./symbol.schema";
 import { getQuote } from "../stocks/finnhub_api";
 
 export async function createSymbol(
-  symbolInput: Prisma.SymbolCreateInput
+  symbolInput: Prisma.SymbolCreateInput,
 ): Promise<Symbol> {
   return await db.symbol.create({
     data: symbolInput,
@@ -18,7 +18,7 @@ export async function getSymbols(): Promise<Symbol[]> {
 }
 
 export async function getSymbol(
-  id: number
+  id: number,
 ): Promise<Symbol | FullSymbolResponse> {
   const symbol = await db.symbol.findUniqueOrThrow({ where: { id } });
 
@@ -55,7 +55,7 @@ export async function getSymbol(
 
 export async function updateSymbol(
   id: number,
-  symbolUpdates: Prisma.SymbolUpdateInput
+  symbolUpdates: Prisma.SymbolUpdateInput,
 ): Promise<Symbol> {
   return await db.symbol.update({ where: { id }, data: symbolUpdates });
 }

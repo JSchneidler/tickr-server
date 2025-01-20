@@ -2,36 +2,18 @@ import { FastifyInstance } from "fastify";
 import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-
 import {
-  createTokenHandler,
-  getTokensHandler,
-  getTokenHandler,
-  revokeTokenHandler,
-} from "./token.controller";
-import {
-  createTokenRequestBody,
   getTokenParams,
   tokenResponse,
   tokensResponse,
-} from "./token.schema";
+} from "../token/token.schema";
+import {
+  getUserTokenHandler,
+  getUserTokensHandler,
+  revokeUserTokenHandler,
+} from "./user_token.controller";
 
 export default function (f: FastifyInstance) {
-  f.post(
-    "/",
-    {
-      onRequest: [f.authenticate],
-      schema: {
-        body: createTokenRequestBody,
-        response: {
-          ...errorResponseSchemas,
-          201: tokenResponse,
-        },
-      },
-    },
-    createTokenHandler,
-  );
-
   f.get(
     "/",
     {
@@ -43,7 +25,7 @@ export default function (f: FastifyInstance) {
         },
       },
     },
-    getTokensHandler,
+    getUserTokensHandler,
   );
 
   f.get(
@@ -54,11 +36,11 @@ export default function (f: FastifyInstance) {
         params: getTokenParams,
         response: {
           ...errorResponseSchemas,
-          200: tokensResponse,
+          200: tokenResponse,
         },
       },
     },
-    getTokenHandler,
+    getUserTokenHandler,
   );
 
   f.delete(
@@ -73,6 +55,6 @@ export default function (f: FastifyInstance) {
         },
       },
     },
-    revokeTokenHandler,
+    revokeUserTokenHandler,
   );
 }

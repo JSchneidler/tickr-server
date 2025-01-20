@@ -44,6 +44,7 @@ export const updateUserRequestBody = Object({
   ...Partial(createUserRequestBody).properties,
   role: String(),
 });
+export type UpdateUserRequestBody = Static<typeof updateUserRequestBody>;
 
 export const userResponse = Object({
   ...Required(Omit(updateUserRequestBody, ["password"])).properties,

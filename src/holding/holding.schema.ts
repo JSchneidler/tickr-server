@@ -17,7 +17,13 @@ export const getHoldingParams = Object({
 });
 export type GetHoldingParams = Static<typeof getHoldingParams>;
 
+export const updateHoldingRequestBody = Object({
+  shares: String(),
+});
+export type UpdateHoldingRequestBody = Static<typeof updateHoldingRequestBody>;
+
 export const holdingResponse = Object({
+  ...updateHoldingRequestBody.properties,
   id: holdingId,
   userId,
   symbolId,

@@ -1,4 +1,5 @@
-import { FastifyRequest } from "fastify";
+import { FastifyRequest, FastifyReply } from "fastify";
+import { Role } from "@prisma/client";
 
 import { createToken, getToken, getTokens, revokeToken } from "./token.service";
 import { CreateTokenRequestBody, GetTokenParams } from "./token.schema";
@@ -11,18 +12,23 @@ export async function createTokenHandler(
   return token;
 }
 
-export async function getTokensHandler() {
-  return await getTokens();
+export async function getTokensHandler(req: FastifyRequest, rep: FastifyReply) {
+  if (req.user.role === Role.ADMIN) return await getTokens();
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function getTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
+  rep: FastifyReply,
 ) {
-  return await getToken(req.params.tokenId);
+  if (req.user.role === Role.ADMIN) return await getToken(req.params.tokenId);
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function revokeTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
+  rep: FastifyReply,
 ): Promise<void> {
-  await revokeToken(req.params.tokenId);
+  if (req.user.role === Role.ADMIN) await revokeToken(req.params.tokenId);
+  else rep.code(403).send("Insufficient permission");
 }

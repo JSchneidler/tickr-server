@@ -21,6 +21,10 @@ export async function getHoldings() {
   return await db.holding.findMany();
 }
 
+export async function getHoldingsForUser(userId: number) {
+  return await db.holding.findMany({ where: { userId } });
+}
+
 export async function getHolding(id: number) {
   return await db.holding.findUniqueOrThrow({ where: { id } });
 }

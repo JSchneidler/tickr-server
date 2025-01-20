@@ -1,4 +1,5 @@
-import { FastifyRequest } from "fastify";
+import { FastifyRequest, FastifyReply } from "fastify";
+import { Role } from "@prisma/client";
 
 import {
   getOrders,
@@ -22,26 +23,35 @@ export async function createOrderHandler(
   return await createOrder(orderInput, req.user.id, symbolId);
 }
 
-export async function getOrdersHandler() {
-  return await getOrders();
+export async function getOrdersHandler(req: FastifyRequest, rep: FastifyReply) {
+  if (req.user.role === Role.ADMIN) return await getOrders();
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function getOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,
+  rep: FastifyReply,
 ) {
-  return await getOrder(req.params.orderId);
+  if (req.user.role === Role.ADMIN) return await getOrder(req.params.orderId);
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function updateOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams; Body: UpdateOrderRequestBody }>,
+  rep: FastifyReply,
 ) {
-  return await updateOrder(req.params.orderId, req.body);
+  if (req.user.role === Role.ADMIN)
+    return await updateOrder(req.params.orderId, req.body);
+  else rep.code(403).send("Insufficient permission");
 }
 
 export async function deleteOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,
+  rep: FastifyReply,
 ) {
-  const id = req.params.orderId;
-  await deleteOrder(id);
-  return id;
+  if (req.user.role === Role.ADMIN) {
+    const id = req.params.orderId;
+    await deleteOrder(id);
+    return id;
+  } else rep.code(403).send("Insufficient permission");
 }

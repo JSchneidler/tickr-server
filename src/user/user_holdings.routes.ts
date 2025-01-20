@@ -2,36 +2,20 @@ import { FastifyInstance } from "fastify";
 import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-
 import {
-  createTokenHandler,
-  getTokensHandler,
-  getTokenHandler,
-  revokeTokenHandler,
-} from "./token.controller";
+  getHoldingParams,
+  holdingResponse,
+  holdingsResponse,
+  updateHoldingRequestBody,
+} from "../holding/holding.schema";
 import {
-  createTokenRequestBody,
-  getTokenParams,
-  tokenResponse,
-  tokensResponse,
-} from "./token.schema";
+  deleteUserHoldingHandler,
+  getUserHoldingHandler,
+  getUserHoldingsHandler,
+  updateUserHoldingHandler,
+} from "./user_holdings.controller";
 
 export default function (f: FastifyInstance) {
-  f.post(
-    "/",
-    {
-      onRequest: [f.authenticate],
-      schema: {
-        body: createTokenRequestBody,
-        response: {
-          ...errorResponseSchemas,
-          201: tokenResponse,
-        },
-      },
-    },
-    createTokenHandler,
-  );
-
   f.get(
     "/",
     {
@@ -39,40 +23,56 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: tokensResponse,
+          200: holdingsResponse,
         },
       },
     },
-    getTokensHandler,
+    getUserHoldingsHandler,
   );
 
   f.get(
-    "/:tokenId",
+    "/:holdingId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getTokenParams,
+        params: getHoldingParams,
         response: {
           ...errorResponseSchemas,
-          200: tokensResponse,
+          200: holdingResponse,
         },
       },
     },
-    getTokenHandler,
+    getUserHoldingHandler,
+  );
+
+  f.put(
+    "/:holdingId",
+    {
+      onRequest: [f.authenticate],
+      schema: {
+        params: getHoldingParams,
+        body: updateHoldingRequestBody,
+        response: {
+          ...errorResponseSchemas,
+          200: holdingResponse,
+        },
+      },
+    },
+    updateUserHoldingHandler,
   );
 
   f.delete(
-    "/:tokenId",
+    "/:holdingId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getTokenParams,
+        params: getHoldingParams,
         response: {
           ...errorResponseSchemas,
           200: Type.Number(),
         },
       },
     },
-    revokeTokenHandler,
+    deleteUserHoldingHandler,
   );
 }

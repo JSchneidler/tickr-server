@@ -2,36 +2,20 @@ import { FastifyInstance } from "fastify";
 import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-
 import {
-  createTokenHandler,
-  getTokensHandler,
-  getTokenHandler,
-  revokeTokenHandler,
-} from "./token.controller";
+  getOrderParams,
+  orderResponse,
+  ordersResponse,
+  updateOrderRequestBody,
+} from "../order/order.schema";
 import {
-  createTokenRequestBody,
-  getTokenParams,
-  tokenResponse,
-  tokensResponse,
-} from "./token.schema";
+  deleteUserOrderHandler,
+  getUserOrderHandler,
+  getUserOrdersHandler,
+  updateUserOrderHandler,
+} from "./user_order.controller";
 
 export default function (f: FastifyInstance) {
-  f.post(
-    "/",
-    {
-      onRequest: [f.authenticate],
-      schema: {
-        body: createTokenRequestBody,
-        response: {
-          ...errorResponseSchemas,
-          201: tokenResponse,
-        },
-      },
-    },
-    createTokenHandler,
-  );
-
   f.get(
     "/",
     {
@@ -39,40 +23,56 @@ export default function (f: FastifyInstance) {
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: tokensResponse,
+          200: ordersResponse,
         },
       },
     },
-    getTokensHandler,
+    getUserOrdersHandler,
   );
 
   f.get(
-    "/:tokenId",
+    "/:orderId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getTokenParams,
+        params: getOrderParams,
         response: {
           ...errorResponseSchemas,
-          200: tokensResponse,
+          200: orderResponse,
         },
       },
     },
-    getTokenHandler,
+    getUserOrderHandler,
+  );
+
+  f.put(
+    "/:orderId",
+    {
+      onRequest: [f.authenticate],
+      schema: {
+        params: getOrderParams,
+        body: updateOrderRequestBody,
+        response: {
+          ...errorResponseSchemas,
+          200: orderResponse,
+        },
+      },
+    },
+    updateUserOrderHandler,
   );
 
   f.delete(
-    "/:tokenId",
+    "/:orderId",
     {
       onRequest: [f.authenticate],
       schema: {
-        params: getTokenParams,
+        params: getOrderParams,
         response: {
           ...errorResponseSchemas,
           200: Type.Number(),
         },
       },
     },
-    revokeTokenHandler,
+    deleteUserOrderHandler,
   );
 }

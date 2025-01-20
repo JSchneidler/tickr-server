@@ -24,6 +24,12 @@ export async function getTokens(): Promise<TokenWithoutSensitive[]> {
   return await db.accessToken.findMany();
 }
 
+export async function getTokensForUser(
+  userId: number,
+): Promise<TokenWithoutSensitive[]> {
+  return await db.accessToken.findMany({ where: { userId } });
+}
+
 export async function getToken(id: number): Promise<TokenWithoutSensitive> {
   return await db.accessToken.findUniqueOrThrow({ where: { id } });
 }

@@ -57,6 +57,10 @@ export async function getOrders() {
   return await db.order.findMany();
 }
 
+export async function getOrdersForUser(userId: number) {
+  return await db.order.findMany({ where: { userId } });
+}
+
 export async function getOrder(id: number) {
   return await db.order.findUniqueOrThrow({ where: { id } });
 }
