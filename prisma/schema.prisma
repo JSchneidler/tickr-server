@@ -32,11 +32,6 @@ enum AdminActionType {
   BAN_USER
 }
 
-enum SymbolType {
-  STOCK
-  CRYPTO
-}
-
 model User {
   id    Int    @id @default(autoincrement())
   email String @unique
@@ -126,14 +121,10 @@ model AdminAction {
 }
 
 model Symbol {
-  id          Int        @id @default(autoincrement())
-  name        String
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
   displayName String
   description String?
-  type        SymbolType
-
-  mic  String?
-  figi String? @unique
 
   Order   Order[]
   Holding Holding[]
@@ -141,6 +132,4 @@ model Symbol {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
-  @@unique([name, type])
 }

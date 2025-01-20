@@ -10,19 +10,6 @@ interface Quote {
   pc: number; // Previous close price
 }
 
-interface Symbol {
-  currency: string; // Price's currency
-  description: string;
-  displaySymbol: string;
-  figi: string; // FIGI identifier
-  isin: string; // ISIN, EU and select Asian markets only
-  mic: string; // Primary exchange MIC
-  shareClassFIGI: string; // Global Share Class FIGI
-  symbol: string; // Unique symbol used in /stock/candle
-  symbol2: string; // Alternative ticker for exchanges with multiple tickers such as BSE
-  type: string; // Security type
-}
-
 type CryptoExchangesResponse = string[];
 
 interface CryptoSymbol {
@@ -47,14 +34,6 @@ export async function getQuote(symbol: string) {
   return (await response.json()) as Quote;
 }
 
-// Only supports US markets for now
-export async function getStockSymbols() {
-  const request = baseRequest(API_BASE_URL + `/stock/symbol?exchange=US`);
-
-  const response = await fetch(request);
-  return (await response.json()) as Symbol[];
-}
-
 export async function getCryptoExchanges() {
   const request = baseRequest(API_BASE_URL + "/crypto/exchange");
 
@@ -64,7 +43,7 @@ export async function getCryptoExchanges() {
 
 export async function getCryptoSymbols(exchange: string) {
   const request = baseRequest(
-    API_BASE_URL + `/stock/symbol?exchange=${exchange}`,
+    API_BASE_URL + `/crypto/symbol?exchange=${exchange}`,
   );
 
   const response = await fetch(request);

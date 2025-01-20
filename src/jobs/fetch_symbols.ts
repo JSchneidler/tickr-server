@@ -1,41 +1,9 @@
-import { getStockSymbols } from "../stocks/finnhub_api";
-import db from "../db";
+import { Prisma } from "@prisma/client";
 
 import "../env";
-import { Prisma, SymbolType } from "@prisma/client";
+import db from "../db";
 
-async function fetchStockSymbols() {
-  const symbols = await getStockSymbols();
-
-  let count = 0;
-  for (const symbol of symbols) {
-    count++;
-    // console.log(`Processing ${symbol.symbol}: ${symbol.displaySymbol}`);
-
-    if (!symbol.figi) continue;
-
-    const updates = {
-      displayName: symbol.displaySymbol,
-      description: symbol.description,
-      type: SymbolType.STOCK,
-    };
-
-    await db.symbol.upsert({
-      where: { figi: symbol.figi },
-      update: updates,
-      create: {
-        ...updates,
-        name: symbol.symbol,
-        mic: symbol.mic,
-        figi: symbol.figi,
-      },
-    });
-  }
-
-  console.log(`Registered ${count.toString()} stock symbols`);
-}
-
-const CRYPTO_SYMBOLS = [
+const SYMBOLS = [
   {
     displayName: "BTC",
     name: "BINANCE:BTCUSDT",
@@ -62,19 +30,18 @@ const CRYPTO_SYMBOLS = [
     description: "It's Cardano, idfk.",
   },
 ];
-async function fetchCryptoSymbols() {
+async function fetchSymbols() {
   let count = 0;
 
-  for (const symbol of CRYPTO_SYMBOLS) {
+  for (const symbol of SYMBOLS) {
     count++;
 
     const updates: Prisma.SymbolUpdateInput = {
       displayName: symbol.displayName,
       description: symbol.description,
-      type: SymbolType.CRYPTO,
     };
     await db.symbol.upsert({
-      where: { name_type: { name: symbol.name, type: SymbolType.CRYPTO } },
+      where: { name: symbol.name },
       update: updates,
       create: {
         ...(updates as Prisma.SymbolCreateInput),
@@ -83,11 +50,7 @@ async function fetchCryptoSymbols() {
     });
   }
 
-  console.log(`Registered ${count.toString()} crypto symbols`);
-}
-
-async function fetchSymbols() {
-  await Promise.all([fetchStockSymbols(), fetchCryptoSymbols()]);
+  console.log(`Registered ${count.toString()} symbols`);
 }
 
 void fetchSymbols();

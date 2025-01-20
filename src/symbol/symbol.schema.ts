@@ -1,11 +1,9 @@
-import { SymbolType } from "@prisma/client";
 import {
   Number,
   Object,
   String,
   Union,
   Null,
-  Enum,
   Optional,
   Array,
   type Static,
@@ -29,24 +27,11 @@ export const symbolResponse = Object({
   name: String(),
   displayName: String(),
   description: Union([String(), Null()]),
-  type: Enum(SymbolType),
-  mic: Union([String(), Null()]),
-  figi: Union([String(), Null()]),
   createdAt: String(),
   updatedAt: String(),
   deletedAt: Optional(String()),
 });
 export const symbolsResponse = Array(symbolResponse);
-
-const companyInfoResponse = Object({
-  companyName: Union([String(), Null()]),
-  companyDescription: Union([String(), Null()]),
-  homepageUrl: Union([String(), Null()]),
-  marketCap: Union([Number(), Null()]),
-  sic_code: Union([String(), Null()]),
-  sic_description: Union([String(), Null()]),
-  total_employees: Union([Number(), Null()]),
-});
 
 const priceInfoResponse = Object({
   currentPrice: Union([String(), Null()]),
@@ -60,7 +45,6 @@ const priceInfoResponse = Object({
 
 export const fullSymbolResponse = Object({
   ...symbolResponse.properties,
-  ...companyInfoResponse.properties,
   ...priceInfoResponse.properties,
 });
 export type FullSymbolResponse = Static<typeof fullSymbolResponse>;
