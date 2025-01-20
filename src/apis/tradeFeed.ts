@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 interface Trade {
   c: number[] | undefined; // Trade conditions
   p: number; // Last price
-  s: string; // Symbol
+  s: string; // Coin
   t: string; // UNIX Timetamp (ms)
   v: string; // Volume
 }
@@ -56,14 +56,15 @@ class TradeFeed {
         if (response.type == "trade") {
           const tradesMessage = response as TradesMessage;
           for (const trade of tradesMessage.data) {
-            if (this.tradesSummaries.has(trade.s)) {
-              const summary = this.tradesSummaries.get(trade.s);
+            const coin = fromSubscriptionFormat(trade.s);
+            if (this.tradesSummaries.has(coin)) {
+              const summary = this.tradesSummaries.get(coin);
               if (summary.low.greaterThan(trade.p))
                 summary.low = new Prisma.Decimal(trade.p);
               else if (summary.high.lessThan(trade.p))
                 summary.high = new Prisma.Decimal(trade.p);
             } else
-              this.tradesSummaries.set(trade.s, {
+              this.tradesSummaries.set(coin, {
                 high: new Prisma.Decimal(trade.p),
                 low: new Prisma.Decimal(trade.p),
               });
@@ -81,43 +82,64 @@ class TradeFeed {
   }
 
   private async publish() {
-    for (const [symbol, summary] of this.tradesSummaries)
-      if (this.subscriptions.has(symbol)) {
-        const listeners = this.subscriptions.get(symbol);
+    for (const [coin, summary] of this.tradesSummaries)
+      if (this.subscriptions.has(coin)) {
+        const listeners = this.subscriptions.get(coin);
         for (const listener of listeners) await listener(summary);
       }
 
     this.tradesSummaries = new Map();
   }
 
-  subscribe(symbol: string, listener: TradeListener): UnSubFn {
-    if (this.subscriptions.has(symbol))
-      this.subscriptions.get(symbol).push(listener);
+  subscribe(coin: string, listener: TradeListener): UnSubFn {
+    if (this.subscriptions.has(coin))
+      this.subscriptions.get(coin).push(listener);
     else {
-      this.subscriptions.set(symbol, [listener]);
-      this.ws.send(JSON.stringify({ type: "subscribe", symbol }));
-      console.log(`Subscribed to ${symbol}`);
+      this.subscriptions.set(coin, [listener]);
+      this.ws.send(
+        JSON.stringify({
+          type: "subscribe",
+          symbol: toSubscriptionFormat(coin),
+        }),
+      );
+      console.log(`Subscribed to ${coin}`);
     }
 
     return () => {
-      this.unsubscribe(symbol, listener);
+      this.unsubscribe(coin, listener);
     };
   }
 
-  private unsubscribe(symbol: string, listener: TradeListener) {
-    if (this.subscriptions.has(symbol)) {
+  private unsubscribe(coin: string, listener: TradeListener) {
+    if (this.subscriptions.has(coin)) {
       this.subscriptions.set(
-        symbol,
-        this.subscriptions.get(symbol).filter((l) => listener !== l),
+        coin,
+        this.subscriptions.get(coin).filter((l) => listener !== l),
       );
 
-      if (this.subscriptions.get(symbol).length === 0) {
-        this.ws.send(JSON.stringify({ type: "unsubscribe", symbol }));
-        this.subscriptions.delete(symbol);
-        console.log(`Unsubscribed from ${symbol}`);
+      if (this.subscriptions.get(coin).length === 0) {
+        this.ws.send(
+          JSON.stringify({
+            type: "unsubscribe",
+            symbol: toSubscriptionFormat(coin),
+          }),
+        );
+        this.subscriptions.delete(coin);
+        console.log(`Unsubscribed from ${coin}`);
       }
     }
   }
+}
+
+const PREFIX = "BINANCE:";
+const SUFFIX = "USDT";
+
+function toSubscriptionFormat(coinName: string) {
+  return `BINANCE:${coinName}USDT`;
+}
+
+function fromSubscriptionFormat(symbol: string) {
+  return symbol.slice(PREFIX.length, SUFFIX.length * -1);
 }
 
 export default new TradeFeed();

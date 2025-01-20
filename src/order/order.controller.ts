@@ -18,9 +18,9 @@ import {
 export async function createOrderHandler(
   req: FastifyRequest<{ Body: CreateOrderRequestBody }>,
 ) {
-  const { symbolId, ...orderInput } = req.body;
+  const { coinId, ...orderInput } = req.body;
 
-  return await createOrder(orderInput, req.user.id, symbolId);
+  return await createOrder(orderInput, req.user.id, coinId);
 }
 
 export async function getOrdersHandler(req: FastifyRequest, rep: FastifyReply) {

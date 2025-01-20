@@ -9,8 +9,3 @@
 // export function getHoldingsForUser(userId: number) {
 //   console.log(`GET HOLDINGS FOR USER ${userId.toString()}`);
 // }
-
-// export default {
-//   banUser,
-//   getHoldingsForUser,
-// };

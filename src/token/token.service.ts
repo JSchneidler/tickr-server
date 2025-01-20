@@ -37,10 +37,3 @@ export async function getToken(id: number): Promise<TokenWithoutSensitive> {
 export async function revokeToken(id: number): Promise<void> {
   await db.accessToken.delete({ where: { id } });
 }
-
-export default {
-  createToken,
-  getTokens,
-  getToken,
-  revokeToken,
-};

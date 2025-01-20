@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./src/index.ts",
-    "dev:migrate": "prisma db push",
+    "db:migrate": "prisma db push",
+    "db:fetch_symbols": "tsx ./src/jobs/fetch_symbols.ts",
     "start": "tsx ./src/index.ts",
     "lint": "tsc --noEmit && eslint . && pnpm format",
     "format": "prettier . --write",

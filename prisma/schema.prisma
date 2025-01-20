@@ -72,8 +72,8 @@ model Holding {
   id     Int     @id @default(autoincrement())
   shares Decimal
 
-  Symbol   Symbol @relation(fields: [symbolId], references: [id])
-  symbolId Int
+  Coin   Coin @relation(fields: [coinId], references: [id])
+  coinId Int
 
   User   User @relation(fields: [userId], references: [id])
   userId Int
@@ -82,7 +82,7 @@ model Holding {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@unique([userId, symbolId])
+  @@unique([userId, coinId])
 }
 
 model Order {
@@ -97,8 +97,8 @@ model Order {
   direction OrderDirection
   type      OrderType
 
-  Symbol   Symbol @relation(fields: [symbolId], references: [id])
-  symbolId Int
+  Coin   Coin @relation(fields: [coinId], references: [id])
+  coinId Int
 
   User   User @relation(fields: [userId], references: [id])
   userId Int
@@ -120,8 +120,9 @@ model AdminAction {
   createdAt DateTime @default(now())
 }
 
-model Symbol {
+model Coin {
   id          Int     @id @default(autoincrement())
+  externalId  String  @unique
   name        String  @unique
   displayName String
   description String?

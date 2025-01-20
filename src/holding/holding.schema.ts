@@ -7,7 +7,7 @@ import {
   type Static,
 } from "@sinclair/typebox";
 import { userId } from "../user/user.schema";
-import { symbolId } from "../symbol/symbol.schema";
+import { coinId } from "../coin/coin.schema";
 
 // API
 export const holdingId = Number();
@@ -26,7 +26,7 @@ export const holdingResponse = Object({
   ...updateHoldingRequestBody.properties,
   id: holdingId,
   userId,
-  symbolId,
+  coinId,
   createdAt: String(),
   updatedAt: String(),
   deletedAt: Optional(String()),

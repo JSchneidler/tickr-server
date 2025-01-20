@@ -5,7 +5,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
-import tradeFeed from "./stocks/tradeFeed";
+import tradeFeed from "./apis/tradeFeed";
 import tradeEngine from "./tradeEngine";
 import jwtAuth from "./auth";
 import api from "./api";

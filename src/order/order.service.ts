@@ -3,14 +3,14 @@ import { OrderDirection, Prisma } from "@prisma/client";
 import db from "../db";
 import tradeEngine from "../tradeEngine";
 import { OrderCreateInput } from "./order.schema";
-import { getSymbol } from "../symbol/symbol.service";
+import { getCoin } from "../coin/coin.service";
 
 export async function createOrder(
   orderInput: OrderCreateInput,
   userId: number,
-  symbolId: number,
+  coinId: number,
 ) {
-  const symbol = await getSymbol(symbolId);
+  const coin = await getCoin(coinId);
 
   if (orderInput.direction === OrderDirection.SELL) {
     const sharesBeingSoldAgg = await db.order.aggregate({
@@ -19,14 +19,14 @@ export async function createOrder(
       },
       where: {
         userId,
-        symbolId: symbol.id,
+        coinId: coin.id,
         filled: false,
         direction: OrderDirection.SELL,
       },
     });
 
     const holding = await db.holding.findUniqueOrThrow({
-      where: { userId_symbolId: { userId, symbolId: symbol.id } },
+      where: { userId_coinId: { userId, coinId: coin.id } },
     });
 
     if (
@@ -44,11 +44,11 @@ export async function createOrder(
     data: {
       ...orderInput,
       User: { connect: { id: userId } },
-      Symbol: { connect: { id: symbol.id } },
+      Coin: { connect: { id: coin.id } },
     },
   });
 
-  tradeEngine.addOrder(order, symbol);
+  tradeEngine.addOrder(order, coin);
 
   return order;
 }
@@ -72,16 +72,8 @@ export async function updateOrder(id: number, data: Prisma.OrderUpdateInput) {
 export async function deleteOrder(id: number) {
   const order = await db.order.delete({ where: { id } });
 
-  const symbol = await getSymbol(order.symbolId);
-  tradeEngine.removeOrder(order, symbol);
+  const coin = await getCoin(order.coinId);
+  tradeEngine.removeOrder(order, coin);
 
   return id;
 }
-
-export default {
-  createOrder,
-  getOrders,
-  getOrder,
-  updateOrder,
-  deleteOrder,
-};

@@ -13,10 +13,10 @@ import {
   type Static,
 } from "@sinclair/typebox";
 import { userId } from "../user/user.schema";
-import { symbolId } from "../symbol/symbol.schema";
+import { coinId } from "../coin/coin.schema";
 
 // Prisma
-export type OrderCreateInput = Omit<Prisma.OrderCreateInput, "User" | "Symbol">;
+export type OrderCreateInput = Omit<Prisma.OrderCreateInput, "User" | "Coin">;
 
 // API
 export const orderId = Number();
@@ -27,7 +27,7 @@ export const getOrderParams = Object({
 export type GetOrderParams = Static<typeof getOrderParams>;
 
 export const createOrderRequestBody = Object({
-  symbolId: Number(),
+  coinId: Number(),
   shares: String(),
   price: Optional(String()),
   direction: Enum(OrderDirection),
@@ -46,7 +46,7 @@ export const orderResponse = Object({
   ...createOrderRequestBody.properties,
   id: orderId,
   userId,
-  symbolId,
+  coinId,
   filled: Boolean(),
   sharePrice: Union([String(), Null()]),
   totalPrice: Union([String(), Null()]),

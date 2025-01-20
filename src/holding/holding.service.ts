@@ -6,13 +6,13 @@ import { UserWithoutSensitive } from "../user/user.schema";
 export async function createHolding(
   holdingInput: Prisma.HoldingCreateInput,
   user: UserWithoutSensitive,
-  symbolId: number,
+  coinId: number,
 ) {
   return await db.holding.create({
     data: {
       ...holdingInput,
       User: { connect: { id: user.id } },
-      Symbol: { connect: { id: symbolId } },
+      Coin: { connect: { id: coinId } },
     },
   });
 }
@@ -39,11 +39,3 @@ export async function updateHolding(
 export async function deleteHolding(id: number) {
   return await db.holding.delete({ where: { id } });
 }
-
-export default {
-  createHolding,
-  getHoldings,
-  getHolding,
-  updateHolding,
-  deleteHolding,
-};

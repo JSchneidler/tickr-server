@@ -1,13 +1,7 @@
 import db from "../db";
-import tradeFeed, { TradesSummary, UnSubFn } from "../stocks/tradeFeed";
+import tradeFeed, { TradesSummary, UnSubFn } from "../apis/tradeFeed";
 import { getUser } from "../user/user.service";
-import {
-  Order,
-  OrderDirection,
-  OrderType,
-  Prisma,
-  Symbol,
-} from "@prisma/client";
+import { Order, OrderDirection, OrderType, Prisma, Coin } from "@prisma/client";
 
 interface Subscription {
   orders: Order[];
@@ -20,66 +14,66 @@ class TradeEngine {
   async start() {
     const orders = await db.order.findMany({
       where: { filled: false },
-      include: { Symbol: true },
+      include: { Coin: true },
     });
 
-    for (const order of orders) this.addOrder(order, order.Symbol);
+    for (const order of orders) this.addOrder(order, order.Coin);
   }
 
-  addOrder(order: Order, symbol: Symbol) {
-    if (this.orders.has(symbol.name)) {
-      this.orders.get(symbol.name).orders.push(order);
+  addOrder(order: Order, coin: Coin) {
+    if (this.orders.has(coin.name)) {
+      this.orders.get(coin.name).orders.push(order);
     } else {
-      this.orders.set(symbol.name, {
+      this.orders.set(coin.name, {
         orders: [order],
-        unsubscribe: tradeFeed.subscribe(symbol.name, async (summary) => {
-          await this.processOrders(symbol, summary);
+        unsubscribe: tradeFeed.subscribe(coin.name, async (summary) => {
+          await this.processOrders(coin, summary);
         }),
       });
     }
     console.log(
-      `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${symbol.name}`,
+      `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}`,
     );
   }
 
-  removeOrder(order: Order, symbol: Symbol) {
-    const subscription = this.orders.get(symbol.name);
+  removeOrder(order: Order, coin: Coin) {
+    const subscription = this.orders.get(coin.name);
     subscription.orders = this.orders
-      .get(symbol.name)
+      .get(coin.name)
       ?.orders.filter((o) => o.id !== order.id);
 
     if (subscription.orders.length === 0) {
       subscription.unsubscribe();
-      this.orders.delete(symbol.name);
+      this.orders.delete(coin.name);
     }
   }
 
-  async processOrders(symbol: Symbol, summary: TradesSummary) {
+  async processOrders(coin: Coin, summary: TradesSummary) {
     // console.log(
-    //   `${this.orders.get(symbol).orders.length.toString()} ${symbol} orders queued`
+    //   `${this.orders.get(coin).orders.length.toString()} ${coin} orders queued`
     // );
 
-    const orders = this.orders.get(symbol.name).orders;
+    const orders = this.orders.get(coin.name).orders;
 
     await Promise.all([
       this.processMarketOrders(
         orders.filter((order) => order.type === OrderType.MARKET),
-        symbol,
+        coin,
         summary,
       ),
       this.processLimitOrders(
         orders.filter((order) => order.type === OrderType.LIMIT),
-        symbol,
+        coin,
         summary,
       ),
       this.processStopOrders(
         orders.filter((order) => order.type === OrderType.STOP),
-        symbol,
+        coin,
         summary,
       ),
       this.processTrailingStopOrders(
         orders.filter((order) => order.type === OrderType.TRAILING_STOP),
-        symbol,
+        coin,
         summary,
       ),
     ]);
@@ -87,26 +81,22 @@ class TradeEngine {
 
   private async fillOrder(
     order: Order,
-    symbol: Symbol,
+    coin: Coin,
     sharePrice: Prisma.Decimal,
     totalPrice: Prisma.Decimal,
   ) {
-    this.removeOrder(order, symbol);
+    this.removeOrder(order, coin);
     await db.order.update({
       where: { id: order.id },
       data: { filled: true, sharePrice, totalPrice },
     });
     console.log(
-      `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${symbol.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`,
+      `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`,
     );
   }
 
-  private async fillBuyOrder(
-    order: Order,
-    symbol: Symbol,
-    price: Prisma.Decimal,
-  ) {
-    const cost = order.shares.mul(price);
+  private async fillBuyOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
+    const cost = order.shares.mul(price).toDecimalPlaces(2);
     const user = await getUser(order.userId);
     if (user.balance.lessThan(cost)) {
       // TODO: Alert user order cannot be filled and/or partially fill
@@ -117,10 +107,10 @@ class TradeEngine {
       return;
     }
 
-    await this.fillOrder(order, symbol, price, cost);
+    await this.fillOrder(order, coin, price, cost);
 
     const where: Prisma.HoldingWhereUniqueInput = {
-      userId_symbolId: { userId: order.userId, symbolId: order.symbolId },
+      userId_coinId: { userId: order.userId, coinId: order.coinId },
     };
     const holding = await db.holding.findUnique({
       where,
@@ -131,28 +121,24 @@ class TradeEngine {
     };
     await db.holding.upsert({
       where,
-      create: { ...shares, symbolId: symbol.id, userId: order.userId },
+      create: { ...shares, coinId: coin.id, userId: order.userId },
       update: shares,
     });
 
     await db.user.update({
       where: { id: order.userId },
-      data: { balance: user.balance.sub(cost) },
+      data: { balance: user.balance.sub(cost).toDecimalPlaces(2) },
     });
   }
 
-  private async fillSellOrder(
-    order: Order,
-    symbol: Symbol,
-    price: Prisma.Decimal,
-  ) {
-    const cost = order.shares.mul(price);
+  private async fillSellOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
+    const cost = order.shares.mul(price).toDecimalPlaces(2);
 
     const holding = await db.holding.findFirstOrThrow({
-      where: { symbolId: order.symbolId },
+      where: { coinId: order.coinId },
     });
 
-    await this.fillOrder(order, symbol, price, cost);
+    await this.fillOrder(order, coin, price, cost);
 
     if (holding.shares.equals(order.shares))
       await db.holding.delete({ where: { id: holding.id } });
@@ -171,7 +157,7 @@ class TradeEngine {
 
   async processMarketOrders(
     orders: Order[],
-    symbol: Symbol,
+    coin: Coin,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;
@@ -181,31 +167,27 @@ class TradeEngine {
     for (const order of orders) {
       switch (order.direction) {
         case OrderDirection.BUY:
-          await this.fillBuyOrder(order, symbol, fillPrice);
+          await this.fillBuyOrder(order, coin, fillPrice);
           break;
         case OrderDirection.SELL:
-          await this.fillSellOrder(order, symbol, fillPrice);
+          await this.fillSellOrder(order, coin, fillPrice);
           break;
       }
     }
   }
   async processLimitOrders(
     orders: Order[],
-    symbol: Symbol,
+    coin: Coin,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;
   }
-  async processStopOrders(
-    orders: Order[],
-    symbol: Symbol,
-    summary: TradesSummary,
-  ) {
+  async processStopOrders(orders: Order[], coin: Coin, summary: TradesSummary) {
     if (orders.length === 0) return;
   }
   async processTrailingStopOrders(
     orders: Order[],
-    symbol: Symbol,
+    coin: Coin,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;

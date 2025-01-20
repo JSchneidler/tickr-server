@@ -23,8 +23,8 @@ function baseRequest(url: string) {
   return request;
 }
 
-export async function getCompanyInfo(symbol: string) {
-  const request = baseRequest(API_BASE_URL + `/v3/reference/tickers/${symbol}`);
+export async function getCompanyInfo(coin: string) {
+  const request = baseRequest(API_BASE_URL + `/v3/reference/tickers/${coin}`);
 
   const response = await fetch(request);
   return ((await response.json()) as CompanyInfoResponse).results;

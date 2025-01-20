@@ -12,40 +12,38 @@ interface Quote {
 
 type CryptoExchangesResponse = string[];
 
-interface CryptoSymbol {
+interface CryptoCoin {
   description: string;
-  displaySymbol: string;
-  symbol: string;
+  displayCoin: string;
+  coin: string;
 }
 
 const API_BASE_URL = "https://finnhub.io/api/v1";
 
 // TODO: Create client?
 function baseRequest(url: string) {
-  const request = new Request(url);
+  const request = new Request(API_BASE_URL + url);
   request.headers.append("X-Finnhub-Token", env.FINNHUB_API_KEY);
   return request;
 }
 
-export async function getQuote(symbol: string) {
-  const request = baseRequest(API_BASE_URL + `/quote?symbol=${symbol}`);
+export async function getQuote(coin: string) {
+  const request = baseRequest(`/quote?coin=${coin}`);
 
   const response = await fetch(request);
   return (await response.json()) as Quote;
 }
 
 export async function getCryptoExchanges() {
-  const request = baseRequest(API_BASE_URL + "/crypto/exchange");
+  const request = baseRequest("/crypto/exchange");
 
   const response = await fetch(request);
   return (await response.json()) as CryptoExchangesResponse;
 }
 
-export async function getCryptoSymbols(exchange: string) {
-  const request = baseRequest(
-    API_BASE_URL + `/crypto/symbol?exchange=${exchange}`,
-  );
+export async function getCryptoCoins(exchange: string) {
+  const request = baseRequest(`/crypto/coin?exchange=${exchange}`);
 
   const response = await fetch(request);
-  return (await response.json()) as CryptoSymbol[];
+  return (await response.json()) as CryptoCoin[];
 }
