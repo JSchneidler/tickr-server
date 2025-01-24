@@ -4,6 +4,7 @@ import { Type } from "@sinclair/typebox";
 import { errorResponseSchemas } from "../error_responses.schema";
 import {
   getOrderParams,
+  getOrdersQueryParams,
   orderResponse,
   ordersResponse,
   updateOrderRequestBody,
@@ -21,6 +22,7 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
+        querystring: getOrdersQueryParams,
         response: {
           ...errorResponseSchemas,
           200: ordersResponse,
@@ -45,7 +47,7 @@ export default function (f: FastifyInstance) {
     getUserOrderHandler,
   );
 
-  f.put(
+  f.patch(
     "/:orderId",
     {
       onRequest: [f.authenticate],
@@ -69,7 +71,6 @@ export default function (f: FastifyInstance) {
         params: getOrderParams,
         response: {
           ...errorResponseSchemas,
-          200: Type.Number(),
         },
       },
     },

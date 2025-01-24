@@ -13,6 +13,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
     "@fastify/jwt": "^9.0.3",
     "@fastify/type-provider-typebox": "^5.1.0",
@@ -38,6 +39,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.4.2",
     "prisma": "^6.2.1",
+    "prismabox": "^1.1.17",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.1"

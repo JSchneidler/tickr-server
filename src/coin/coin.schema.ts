@@ -1,46 +1,55 @@
 import {
-  Number,
-  Object,
-  String,
+  Number as TNum,
+  Object as TObj,
+  String as TStr,
+  Array as TArr,
   Union,
   Null,
-  Optional,
-  Array,
   type Static,
 } from "@sinclair/typebox";
 
 // API
-export const coinId = Number();
+export const coinId = TNum();
 
-export const getCoinParams = Object({
+export const getCoinParams = TObj({
   coinId,
 });
 export type GetCoinParams = Static<typeof getCoinParams>;
 
-export const coinResponse = Object({
+export const coinResponse = TObj({
   id: coinId,
-  externalId: String(),
-  name: String(),
-  displayName: String(),
-  description: Union([String(), Null()]),
-  createdAt: String(),
-  updatedAt: String(),
-  deletedAt: Optional(String()),
+  externalId: TStr(),
+  name: TStr(),
+  displayName: TStr(),
+  description: Union([TStr(), Null()]),
+  createdAt: TStr(),
+  updatedAt: TStr(),
+  deletedAt: Union([TStr(), Null()]),
 });
-export const coinsResponse = Array(coinResponse);
+export const coinsResponse = TArr(coinResponse);
 
-// const priceInfoResponse = Object({
-//   currentPrice: Union([String(), Null()]),
-//   openPrice: Union([String(), Null()]),
-//   change: Union([String(), Null()]),
-//   changePercent: Union([String(), Null()]),
-//   dayHigh: Union([String(), Null()]),
-//   dayLow: Union([String(), Null()]),
-//   previousClose: Union([String(), Null()]),
-// });
+const historicalData = TArr(TArr(TNum(), { maxItems: 2, minItems: 2 }));
+export const coinHistoricalDataResponse = TObj({
+  prices: historicalData,
+  marketCaps: historicalData,
+  totalVolumes: historicalData,
+});
+export type CoinHistoricalDataResponse = Static<
+  typeof coinHistoricalDataResponse
+>;
 
-export const fullCoinResponse = Object({
+const priceInfoResponse = TObj({
+  currentPrice: Union([TStr(), Null()]),
+  openPrice: Union([TStr(), Null()]),
+  dayHigh: Union([TStr(), Null()]),
+  dayLow: Union([TStr(), Null()]),
+  previousClose: Union([TStr(), Null()]),
+  change: Union([TStr(), Null()]),
+  changePercent: Union([TStr(), Null()]),
+});
+
+export const fullCoinResponse = TObj({
   ...coinResponse.properties,
-  // ...priceInfoResponse.properties,
+  ...priceInfoResponse.properties,
 });
 export type FullCoinResponse = Static<typeof fullCoinResponse>;

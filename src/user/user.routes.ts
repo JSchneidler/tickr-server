@@ -53,7 +53,7 @@ export default async function (f: FastifyInstance) {
     getUserHandler,
   );
 
-  f.put(
+  f.patch(
     "/:userId",
     {
       onRequest: [f.authenticate],
@@ -77,7 +77,6 @@ export default async function (f: FastifyInstance) {
         params: getUserParams,
         response: {
           ...errorResponseSchemas,
-          200: Type.Number(),
         },
       },
     },

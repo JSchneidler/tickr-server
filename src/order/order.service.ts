@@ -53,12 +53,12 @@ export async function createOrder(
   return order;
 }
 
-export async function getOrders() {
-  return await db.order.findMany();
+export async function getOrders(active = false) {
+  return await db.order.findMany({ where: { filled: !active } });
 }
 
-export async function getOrdersForUser(userId: number) {
-  return await db.order.findMany({ where: { userId } });
+export async function getOrdersForUser(userId: number, active = false) {
+  return await db.order.findMany({ where: { userId, filled: !active } });
 }
 
 export async function getOrder(id: number) {
@@ -74,6 +74,4 @@ export async function deleteOrder(id: number) {
 
   const coin = await getCoin(order.coinId);
   tradeEngine.removeOrder(order, coin);
-
-  return id;
 }

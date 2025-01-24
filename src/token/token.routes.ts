@@ -69,7 +69,6 @@ export default function (f: FastifyInstance) {
         params: getTokenParams,
         response: {
           ...errorResponseSchemas,
-          200: Type.Number(),
         },
       },
     },

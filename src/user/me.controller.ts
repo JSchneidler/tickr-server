@@ -9,7 +9,7 @@ import { getHoldingsForUser, getHolding } from "../holding/holding.service";
 import { GetHoldingParams } from "../holding/holding.schema";
 
 import { getOrdersForUser, getOrder } from "../order/order.service";
-import { GetOrderParams } from "../order/order.schema";
+import { GetOrderParams, GetOrdersQueryParams } from "../order/order.schema";
 
 export async function getMeHandler(req: FastifyRequest) {
   return await getUser(req.user.id);
@@ -33,8 +33,10 @@ export async function getMyHoldingHandler(
   return await getHolding(req.user.id);
 }
 
-export async function getMyOrdersHandler(req: FastifyRequest) {
-  return await getOrdersForUser(req.user.id);
+export async function getMyOrdersHandler(
+  req: FastifyRequest<{ Querystring: GetOrdersQueryParams }>,
+) {
+  return await getOrdersForUser(req.user.id, req.query.active);
 }
 export async function getMyOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,

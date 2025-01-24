@@ -1,10 +1,11 @@
 import { Prisma } from "@prisma/client";
 import {
-  Number,
-  Object,
-  String,
-  Optional,
-  Array,
+  Object as TObj,
+  String as TStr,
+  Number as TNum,
+  Array as TArr,
+  Union,
+  Null,
   type Static,
 } from "@sinclair/typebox";
 import { userId } from "../user/user.schema";
@@ -20,22 +21,22 @@ export interface CreateToken {
 }
 
 // API
-const tokenId = Number();
-export const getTokenParams = Object({
+const tokenId = TNum();
+export const getTokenParams = TObj({
   tokenId,
 });
 export type GetTokenParams = Static<typeof getTokenParams>;
 
-export const createTokenRequestBody = Object({
-  name: String({ minLength: 1 }),
+export const createTokenRequestBody = TObj({
+  name: TStr({ minLength: 1 }),
 });
 export type CreateTokenRequestBody = Static<typeof createTokenRequestBody>;
 
-export const tokenResponse = Object({
+export const tokenResponse = TObj({
   ...createTokenRequestBody.properties,
   id: tokenId,
   userId: userId,
-  createdAt: String(),
-  revokedAt: Optional(String()),
+  createdAt: TStr(),
+  revokedAt: Union([TStr(), Null()]),
 });
-export const tokensResponse = Array(tokenResponse);
+export const tokensResponse = TArr(tokenResponse);

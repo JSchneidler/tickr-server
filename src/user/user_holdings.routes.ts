@@ -45,7 +45,7 @@ export default function (f: FastifyInstance) {
     getUserHoldingHandler,
   );
 
-  f.put(
+  f.patch(
     "/:holdingId",
     {
       onRequest: [f.authenticate],
@@ -69,7 +69,6 @@ export default function (f: FastifyInstance) {
         params: getHoldingParams,
         response: {
           ...errorResponseSchemas,
-          200: Type.Number(),
         },
       },
     },

@@ -1,15 +1,21 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
 import { createUser } from "../user/user.service";
-import { CreateUserRequestBody, UserCreateInput } from "../user/user.schema";
+import { CreateUserRequestBody } from "../user/user.schema";
 import { LoginRequestBody } from "./auth.schema";
 import { login } from "./auth.service";
 
 export async function registerHandler(
   req: FastifyRequest<{ Body: CreateUserRequestBody }>,
+  rep: FastifyReply,
 ) {
-  const user: UserCreateInput = req.body;
-  return await createUser(user);
+  const { user, token } = await createUser(req.body);
+  rep.setCookie("token", token, {
+    domain: "localhost",
+    path: "/",
+    httpOnly: true,
+  });
+  return user;
 }
 
 export async function loginHandler(
@@ -17,7 +23,22 @@ export async function loginHandler(
   rep: FastifyReply,
 ) {
   try {
-    return await login(req.body.email, req.body.password);
+    const { user, token } = await login(req.body.email, req.body.password);
+    rep.setCookie("token", token, {
+      domain: "localhost",
+      path: "/",
+      httpOnly: true,
+    });
+    return user;
+  } catch (error) {
+    console.error(error);
+    rep.code(401).send("Unauthorized");
+  }
+}
+
+export function logoutHandler(req: FastifyRequest, rep: FastifyReply) {
+  try {
+    return rep.clearCookie("token").send();
   } catch (error) {
     console.error(error);
     rep.code(401).send("Unauthorized");

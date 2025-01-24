@@ -12,6 +12,7 @@ import {
 import {
   CreateOrderRequestBody,
   GetOrderParams,
+  GetOrdersQueryParams,
   UpdateOrderRequestBody,
 } from "./order.schema";
 
@@ -23,8 +24,11 @@ export async function createOrderHandler(
   return await createOrder(orderInput, req.user.id, coinId);
 }
 
-export async function getOrdersHandler(req: FastifyRequest, rep: FastifyReply) {
-  if (req.user.role === Role.ADMIN) return await getOrders();
+export async function getOrdersHandler(
+  req: FastifyRequest<{ Querystring: GetOrdersQueryParams }>,
+  rep: FastifyReply,
+) {
+  if (req.user.role === Role.ADMIN) return await getOrders(req.query.active);
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -50,8 +54,6 @@ export async function deleteOrderHandler(
   rep: FastifyReply,
 ) {
   if (req.user.role === Role.ADMIN) {
-    const id = req.params.orderId;
-    await deleteOrder(id);
-    return id;
+    await deleteOrder(req.params.orderId);
   } else rep.code(403).send("Insufficient permission");
 }

@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyWebsocket from "@fastify/websocket";
 import fastifySwagger from "@fastify/swagger";
@@ -46,6 +47,7 @@ const start = async () => {
       staticCSP: true,
     });
 
+    await f.register(fastifyCookie);
     await f.register(jwtAuth);
 
     await f.register(fastifyWebsocket);

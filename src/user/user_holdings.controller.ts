@@ -44,12 +44,10 @@ export async function updateUserHoldingHandler(
 }
 
 export async function deleteUserHoldingHandler(
-  req: FastifyRequest<{ Params: GetUserParams }>,
+  req: FastifyRequest<{ Params: GetHoldingParams }>,
   rep: FastifyReply,
 ) {
-  const id = req.params.userId;
   if (req.user.role === Role.ADMIN) {
-    await deleteHolding(id);
-    return id;
+    await deleteHolding(req.params.holdingId);
   } else rep.code(403).send("Insufficient permission");
 }

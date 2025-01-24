@@ -30,9 +30,7 @@ export async function deleteUserHandler(
   req: FastifyRequest<{ Params: GetUserParams }>,
   rep: FastifyReply,
 ) {
-  const id = req.params.userId;
   if (req.user.role === Role.ADMIN) {
-    await deleteUser(id);
-    return id;
+    await deleteUser(req.params.userId);
   } else rep.code(403).send("Insufficient permission");
 }

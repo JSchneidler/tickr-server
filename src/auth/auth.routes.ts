@@ -1,9 +1,13 @@
 import { FastifyInstance } from "fastify";
 
 import { errorResponseSchemas } from "../error_responses.schema";
-import { registerHandler, loginHandler } from "./auth.controller";
+import {
+  registerHandler,
+  loginHandler,
+  logoutHandler,
+} from "./auth.controller";
 import { createUserRequestBody, userResponse } from "../user/user.schema";
-import { loginRequestBody, loginResponse } from "./auth.schema";
+import { loginRequestBody } from "./auth.schema";
 
 export default function (f: FastifyInstance) {
   f.post(
@@ -13,7 +17,7 @@ export default function (f: FastifyInstance) {
         body: createUserRequestBody,
         response: {
           ...errorResponseSchemas,
-          201: loginResponse,
+          201: userResponse,
         },
       },
     },
@@ -27,24 +31,23 @@ export default function (f: FastifyInstance) {
         body: loginRequestBody,
         response: {
           ...errorResponseSchemas,
-          200: loginResponse,
+          200: userResponse,
         },
       },
     },
     loginHandler,
   );
 
-  f.get(
-    "/check",
+  f.post(
+    "/logout",
     {
-      onRequest: [f.authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
-          200: userResponse,
+          // 200: userResponse,
         },
       },
     },
-    (req) => req.user,
+    logoutHandler,
   );
 }

@@ -7,14 +7,21 @@ import {
   updateOrder,
 } from "../order/order.service";
 import { GetUserParams } from "./user.schema";
-import { GetOrderParams, UpdateOrderRequestBody } from "../order/order.schema";
+import {
+  GetOrderParams,
+  GetOrdersQueryParams,
+  UpdateOrderRequestBody,
+} from "../order/order.schema";
 
 export async function getUserOrdersHandler(
-  req: FastifyRequest<{ Params: GetUserParams }>,
+  req: FastifyRequest<{
+    Params: GetUserParams;
+    Querystring: GetOrdersQueryParams;
+  }>,
   rep: FastifyReply,
 ) {
   if (req.user.role === Role.ADMIN)
-    return await getOrdersForUser(req.params.userId);
+    return await getOrdersForUser(req.params.userId, req.query.active);
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -39,9 +46,7 @@ export async function deleteUserOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,
   rep: FastifyReply,
 ) {
-  const id = req.params.orderId;
   if (req.user.role === Role.ADMIN) {
-    await deleteOrder(id);
-    return id;
+    await deleteOrder(req.params.orderId);
   } else rep.code(403).send("Insufficient permission");
 }

@@ -80,23 +80,27 @@ export function compareJwtHash(jwt: Buffer, hash: Buffer) {
 export default FastifyPlugin(async (f: FastifyInstance) => {
   await f.register(fastifyJwt, {
     secret: env.JWT_SECRET,
+    cookie: {
+      cookieName: "token",
+      signed: false,
+    },
   });
-  f.addHook("preHandler", async (req: FastifyRequest, rep) => {
+  f.addHook("onRequest", async (req: FastifyRequest) => {
     try {
-      if (req.headers.authorization) {
-        await req.jwtVerify();
-        req.user = await getUser(req.user.id);
-      }
+      await req.jwtVerify();
+      req.user = await getUser(req.user.id);
     } catch (err) {
       f.log.error(err);
-      rep.status(401).send("Unauthorized");
+      req.user = null;
     }
   });
   // f.decorateRequest("user") // TODO: Add full Prisma user as req.user
   f.decorate("authenticate", async (req: FastifyRequest, rep: FastifyReply) => {
     try {
       await req.jwtVerify();
+      req.user = await getUser(req.user.id);
     } catch (err) {
+      f.log.error(err);
       rep.status(401).send(err);
     }
   });

@@ -9,8 +9,6 @@ import tokenRoutes from "./token/token.routes";
 import holdingRoutes from "./holding/holding.routes";
 import orderRoutes from "./order/order.routes";
 
-import { getCompanyInfo } from "./apis/polygon_api";
-
 export default async function (f: FastifyInstance) {
   f.get("/ws", { websocket: true }, (connection) => {
     console.log("Client connected");
@@ -36,8 +34,6 @@ export default async function (f: FastifyInstance) {
       console.log("Client disconnected");
     });
   });
-
-  f.get("/", async () => await getCompanyInfo("NVDA"));
 
   await f.register(authRoutes, { prefix: "/auth" });
   await f.register(meRoutes, { prefix: "/me" });

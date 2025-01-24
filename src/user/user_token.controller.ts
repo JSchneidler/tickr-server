@@ -29,9 +29,7 @@ export async function revokeUserTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
   rep: FastifyReply,
 ) {
-  const id = req.params.tokenId;
   if (req.user.role === Role.ADMIN) {
-    await revokeToken(id);
-    return id;
+    await revokeToken(req.params.tokenId);
   } else rep.code(403).send("Insufficient permission");
 }

@@ -2,8 +2,17 @@ import { FastifyInstance } from "fastify";
 
 import { errorResponseSchemas } from "../error_responses.schema";
 
-import { getCoinsHandler, getCoinHandler } from "./coin.controller";
-import { fullCoinResponse, getCoinParams, coinsResponse } from "./coin.schema";
+import {
+  getCoinsHandler,
+  getCoinHandler,
+  getCoinHistoricalDataHandler,
+} from "./coin.controller";
+import {
+  fullCoinResponse,
+  getCoinParams,
+  coinsResponse,
+  coinHistoricalDataResponse,
+} from "./coin.schema";
 
 export default function (f: FastifyInstance) {
   f.get(
@@ -31,5 +40,19 @@ export default function (f: FastifyInstance) {
       },
     },
     getCoinHandler,
+  );
+
+  f.get(
+    "/:coinId/historical",
+    {
+      schema: {
+        params: getCoinParams,
+        response: {
+          ...errorResponseSchemas,
+          200: coinHistoricalDataResponse,
+        },
+      },
+    },
+    getCoinHistoricalDataHandler,
   );
 }
