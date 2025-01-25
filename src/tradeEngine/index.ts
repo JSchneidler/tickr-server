@@ -1,15 +1,21 @@
+import { Order, OrderDirection, OrderType, Prisma, Coin } from "@prisma/client";
+
 import db from "../db";
 import tradeFeed, { TradesSummary, UnSubFn } from "../apis/tradeFeed";
-import { getUser } from "../user/user.service";
-import { Order, OrderDirection, OrderType, Prisma, Coin } from "@prisma/client";
+import { getUser, updateUser } from "../user/user.service";
+import { updateOrder } from "../order/order.service";
+import { deleteHolding, updateHolding } from "../holding/holding.service";
 
 interface Subscription {
   orders: Order[];
   unsubscribe: UnSubFn;
 }
 
+type UserListener = (order: Order) => void;
+
 class TradeEngine {
   private orders = new Map<string, Subscription>();
+  private liveUsers = new Map<number, UserListener>();
 
   async start() {
     const orders = await db.order.findMany({
@@ -31,9 +37,9 @@ class TradeEngine {
         }),
       });
     }
-    console.log(
-      `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}`,
-    );
+    // console.log(
+    //   `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}`
+    // );
   }
 
   removeOrder(order: Order, coin: Coin) {
@@ -48,7 +54,15 @@ class TradeEngine {
     }
   }
 
-  async processOrders(coin: Coin, summary: TradesSummary) {
+  addLiveUser(userId: number, listener: UserListener) {
+    this.liveUsers.set(userId, listener);
+  }
+
+  removeLiveUser(userId: number) {
+    this.liveUsers.delete(userId);
+  }
+
+  private async processOrders(coin: Coin, summary: TradesSummary) {
     // console.log(
     //   `${this.orders.get(coin).orders.length.toString()} ${coin} orders queued`
     // );
@@ -86,25 +100,29 @@ class TradeEngine {
     totalPrice: Prisma.Decimal,
   ) {
     this.removeOrder(order, coin);
-    await db.order.update({
-      where: { id: order.id },
-      data: { filled: true, sharePrice, totalPrice },
+    const updatedOrder = await updateOrder(order.id, {
+      filled: true,
+      sharePrice,
+      totalPrice,
     });
-    console.log(
-      `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`,
-    );
+    if (this.liveUsers.has(order.userId))
+      this.liveUsers.get(order.userId)(updatedOrder);
+    // console.log(
+    //   `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`
+    // );
   }
 
   private async fillBuyOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
-    const cost = order.shares.mul(price).toDecimalPlaces(2);
     const user = await getUser(order.userId);
-    if (user.balance.lessThan(cost)) {
-      // TODO: Alert user order cannot be filled and/or partially fill
-      // console.log(
-      //   `Order ${order.id.toString()} cannot be fulfilled, user balance not high enough.`
-      // );
-      // this.removeOrder(order);
-      return;
+
+    let cost;
+    if (order.shares) {
+      cost = order.shares.mul(price).toDecimalPlaces(2);
+      if (user.balance.lessThan(cost)) return;
+    } else if (order.price) {
+      if (order.price.gt(user.balance)) return;
+      cost = order.price;
+      order.shares = cost.div(price);
     }
 
     await this.fillOrder(order, coin, price, cost);
@@ -125,13 +143,13 @@ class TradeEngine {
       update: shares,
     });
 
-    await db.user.update({
-      where: { id: order.userId },
-      data: { balance: user.balance.sub(cost).toDecimalPlaces(2) },
+    await updateUser(order.userId, {
+      balance: user.balance.sub(cost).toDecimalPlaces(2),
     });
   }
 
   private async fillSellOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
+    // TODO: Check if selling by total cost or shares
     const cost = order.shares.mul(price).toDecimalPlaces(2);
 
     const holding = await db.holding.findFirstOrThrow({
@@ -140,52 +158,62 @@ class TradeEngine {
 
     await this.fillOrder(order, coin, price, cost);
 
-    if (holding.shares.equals(order.shares))
-      await db.holding.delete({ where: { id: holding.id } });
+    if (holding.shares.equals(order.shares)) await deleteHolding(holding.id);
     else
-      await db.holding.update({
-        where: { id: holding.id },
-        data: { shares: holding.shares.sub(order.shares) },
+      await updateHolding(holding.id, {
+        shares: holding.shares.sub(order.shares),
       });
 
     const user = await getUser(order.userId);
-    await db.user.update({
-      where: { id: order.userId },
-      data: { balance: user.balance.add(cost) },
-    });
+    await updateUser(order.userId, { balance: user.balance.add(cost) });
   }
 
-  async processMarketOrders(
+  private async processMarketOrders(
     orders: Order[],
     coin: Coin,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;
-
-    const fillPrice = summary.high.add(summary.low).div(2);
 
     for (const order of orders) {
       switch (order.direction) {
         case OrderDirection.BUY:
-          await this.fillBuyOrder(order, coin, fillPrice);
+          await this.fillBuyOrder(order, coin, summary.low);
           break;
         case OrderDirection.SELL:
-          await this.fillSellOrder(order, coin, fillPrice);
+          await this.fillSellOrder(order, coin, summary.high);
           break;
       }
     }
   }
-  async processLimitOrders(
+  private async processLimitOrders(
+    orders: Order[],
+    coin: Coin,
+    summary: TradesSummary,
+  ) {
+    if (orders.length === 0) return;
+
+    for (const order of orders) {
+      switch (order.direction) {
+        case OrderDirection.BUY:
+          if (summary.low.lte(order.price))
+            await this.fillBuyOrder(order, coin, summary.low);
+          break;
+        case OrderDirection.SELL:
+          if (summary.high.gte(order.price))
+            await this.fillSellOrder(order, coin, summary.high);
+          break;
+      }
+    }
+  }
+  private async processStopOrders(
     orders: Order[],
     coin: Coin,
     summary: TradesSummary,
   ) {
     if (orders.length === 0) return;
   }
-  async processStopOrders(orders: Order[], coin: Coin, summary: TradesSummary) {
-    if (orders.length === 0) return;
-  }
-  async processTrailingStopOrders(
+  private async processTrailingStopOrders(
     orders: Order[],
     coin: Coin,
     summary: TradesSummary,

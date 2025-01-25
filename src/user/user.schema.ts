@@ -24,7 +24,7 @@ export interface UserCreateInput
 }
 
 export interface UserUpdateInput extends Prisma.UserUpdateInput {
-  password: string;
+  password?: string;
 }
 
 // API

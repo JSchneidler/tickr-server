@@ -7,21 +7,16 @@ import {
   updateOrder,
 } from "../order/order.service";
 import { GetUserParams } from "./user.schema";
-import {
-  GetOrderParams,
-  GetOrdersQueryParams,
-  UpdateOrderRequestBody,
-} from "../order/order.schema";
+import { GetOrderParams, UpdateOrderRequestBody } from "../order/order.schema";
 
 export async function getUserOrdersHandler(
   req: FastifyRequest<{
     Params: GetUserParams;
-    Querystring: GetOrdersQueryParams;
   }>,
   rep: FastifyReply,
 ) {
   if (req.user.role === Role.ADMIN)
-    return await getOrdersForUser(req.params.userId, req.query.active);
+    return await getOrdersForUser(req.params.userId);
   else rep.code(403).send("Insufficient permission");
 }
 

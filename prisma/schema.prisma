@@ -88,7 +88,7 @@ model Holding {
 
 model Order {
   id     Int      @id @default(autoincrement())
-  shares Decimal
+  shares Decimal?
   price  Decimal?
 
   filled     Boolean  @default(false)
@@ -122,12 +122,12 @@ model AdminAction {
 }
 
 model Coin {
-  id          Int     @id @default(autoincrement())
-  externalId  String  @unique
-  // imageUrl    String
-  name        String  @unique
+  id          Int    @id @default(autoincrement())
+  externalId  String @unique
+  imageUrl    String
+  name        String @unique
   displayName String
-  description String?
+  description String
 
   Order   Order[]
   Holding Holding[]

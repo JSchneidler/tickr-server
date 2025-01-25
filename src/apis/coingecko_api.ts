@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 
 import env from "../env";
-import { SUPPORTED_COINS } from "./supported_coins";
 
 interface CoinData {
   name: string;
@@ -9,6 +8,11 @@ interface CoinData {
     en: string;
   };
   symbol: string;
+  image: {
+    thumb: string;
+    small: string;
+    large: string;
+  };
 }
 
 interface PriceResponse {
@@ -42,24 +46,12 @@ function baseRequest(url: string) {
   return request;
 }
 
-export async function getCoinData(): Promise<Prisma.CoinCreateInput[]> {
-  const coins: Prisma.CoinCreateInput[] = [];
-  for (const coin of SUPPORTED_COINS) {
-    const request = baseRequest(
-      `/coins/${coin}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
-    );
-    const response = await fetch(request);
-    const coinData = (await response.json()) as CoinData;
-
-    coins.push({
-      externalId: coin,
-      name: coinData.symbol.toUpperCase(),
-      displayName: coinData.name,
-      description: coinData.description.en,
-    });
-  }
-
-  return coins;
+export async function getCoinData(coinId: string): Promise<CoinData> {
+  const request = baseRequest(
+    `/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
+  );
+  const response = await fetch(request);
+  return (await response.json()) as CoinData;
 }
 
 export async function getPrice(coinId: string): Promise<string> {

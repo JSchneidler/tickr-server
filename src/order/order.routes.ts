@@ -12,7 +12,7 @@ import {
 } from "./order.controller";
 import {
   createOrderRequestBody,
-  getOrdersQueryParams,
+  getOrderParams,
   orderResponse,
   ordersResponse,
 } from "./order.schema";
@@ -38,7 +38,6 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        querystring: getOrdersQueryParams,
         response: {
           ...errorResponseSchemas,
           200: ordersResponse,
@@ -53,9 +52,7 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        params: Type.Object({
-          orderId: Type.String(),
-        }),
+        params: getOrderParams,
         response: {
           ...errorResponseSchemas,
           200: orderResponse,
@@ -70,9 +67,7 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        params: Type.Object({
-          orderId: Type.String(),
-        }),
+        params: getOrderParams,
         body: Type.Object({}),
         response: {
           ...errorResponseSchemas,
@@ -88,9 +83,7 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        params: Type.Object({
-          orderId: Type.String(),
-        }),
+        params: getOrderParams,
         response: {
           ...errorResponseSchemas,
         },

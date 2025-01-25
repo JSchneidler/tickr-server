@@ -13,11 +13,7 @@ import {
 } from "./me.controller";
 import { holdingResponse, holdingsResponse } from "../holding/holding.schema";
 import { tokenResponse, tokensResponse } from "../token/token.schema";
-import {
-  getOrdersQueryParams,
-  orderResponse,
-  ordersResponse,
-} from "../order/order.schema";
+import { orderResponse, ordersResponse } from "../order/order.schema";
 
 export default function (f: FastifyInstance) {
   f.get(
@@ -93,7 +89,6 @@ export default function (f: FastifyInstance) {
     {
       onRequest: [f.authenticate],
       schema: {
-        querystring: getOrdersQueryParams,
         response: {
           ...errorResponseSchemas,
           200: ordersResponse,

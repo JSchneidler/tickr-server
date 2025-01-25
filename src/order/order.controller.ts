@@ -12,23 +12,22 @@ import {
 import {
   CreateOrderRequestBody,
   GetOrderParams,
-  GetOrdersQueryParams,
   UpdateOrderRequestBody,
 } from "./order.schema";
 
 export async function createOrderHandler(
   req: FastifyRequest<{ Body: CreateOrderRequestBody }>,
+  rep: FastifyReply,
 ) {
   const { coinId, ...orderInput } = req.body;
 
-  return await createOrder(orderInput, req.user.id, coinId);
+  if (orderInput.shares || orderInput.price)
+    return await createOrder(orderInput, req.user.id, coinId);
+  else rep.code(400).send("Must specify shares or price");
 }
 
-export async function getOrdersHandler(
-  req: FastifyRequest<{ Querystring: GetOrdersQueryParams }>,
-  rep: FastifyReply,
-) {
-  if (req.user.role === Role.ADMIN) return await getOrders(req.query.active);
+export async function getOrdersHandler(req: FastifyRequest, rep: FastifyReply) {
+  if (req.user.role === Role.ADMIN) return await getOrders();
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -53,7 +52,9 @@ export async function deleteOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,
   rep: FastifyReply,
 ) {
-  if (req.user.role === Role.ADMIN) {
+  const order = await getOrder(req.params.orderId);
+
+  if (req.user.id === order.userId || req.user.role === Role.ADMIN) {
     await deleteOrder(req.params.orderId);
   } else rep.code(403).send("Insufficient permission");
 }

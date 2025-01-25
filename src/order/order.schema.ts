@@ -27,14 +27,9 @@ export const getOrderParams = TObj({
 });
 export type GetOrderParams = Static<typeof getOrderParams>;
 
-export const getOrdersQueryParams = TObj({
-  active: Optional(Boolean()),
-});
-export type GetOrdersQueryParams = Static<typeof getOrdersQueryParams>;
-
 export const createOrderRequestBody = TObj({
   coinId,
-  shares: Decimal,
+  shares: Optional(Decimal),
   price: Optional(Decimal),
   direction: Enum(OrderDirection),
   type: Enum(OrderType),

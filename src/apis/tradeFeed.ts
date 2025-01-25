@@ -1,7 +1,8 @@
 import WebSocket from "ws";
+import { Coin, Prisma } from "@prisma/client";
 
 import env from "../env";
-import { Prisma } from "@prisma/client";
+import { getCoins } from "../coin/coin.service";
 
 interface Trade {
   c: number[] | undefined; // Trade conditions
@@ -25,29 +26,35 @@ type TradeListener = (summary: TradesSummary) => void | Promise<void>;
 export type UnSubFn = () => void;
 
 export interface TradesSummary {
+  last: Prisma.Decimal;
   high: Prisma.Decimal;
   low: Prisma.Decimal;
+}
+
+interface LivePrice {
+  coinId: number;
+  price: string | null;
 }
 
 const FINNHUB_WEBSOCKET_URL = "wss://ws.finnhub.io";
 const URL = `${FINNHUB_WEBSOCKET_URL}?token=${env.FINNHUB_API_KEY}`;
 
-const PUBLISH_INTERVAL = 1000;
+const PUBLISH_INTERVAL = 1000; // Remove interval, publish immediately somehow
 
 class TradeFeed {
-  private subscriptions = new Map<string, TradeListener[]>();
   private ws = new WebSocket(URL, {});
 
+  private coins: Coin[] = [];
+  private subscriptions = new Map<string, TradeListener[]>();
   private tradesSummaries = new Map<string, TradesSummary>();
 
   async start() {
-    setInterval(() => {
-      void this.publish(); // TODO: Race condition? Should make sure publish finishes before publishing again
-    }, PUBLISH_INTERVAL);
+    this.coins = await getCoins();
 
     const connectedPromise = new Promise<void>((resolve, reject) => {
       this.ws.on("open", () => {
         console.log("Connected to Finnhub WSS");
+        this.startSubscriptions();
         resolve();
       });
 
@@ -57,16 +64,17 @@ class TradeFeed {
           const tradesMessage = response as TradesMessage;
           for (const trade of tradesMessage.data) {
             const coin = fromSubscriptionFormat(trade.s);
+            const price = new Prisma.Decimal(trade.p);
             if (this.tradesSummaries.has(coin)) {
               const summary = this.tradesSummaries.get(coin);
-              if (summary.low.greaterThan(trade.p))
-                summary.low = new Prisma.Decimal(trade.p);
-              else if (summary.high.lessThan(trade.p))
-                summary.high = new Prisma.Decimal(trade.p);
+              summary.last = price;
+              if (summary.low.greaterThan(trade.p)) summary.low = price;
+              else if (summary.high.lessThan(trade.p)) summary.high = price;
             } else
               this.tradesSummaries.set(coin, {
-                high: new Prisma.Decimal(trade.p),
-                low: new Prisma.Decimal(trade.p),
+                last: price,
+                high: price,
+                low: price,
               });
           }
         }
@@ -78,7 +86,31 @@ class TradeFeed {
       });
     });
 
+    setInterval(() => {
+      void this.publish(); // TODO: Race condition? Should make sure publish finishes before publishing again
+    }, PUBLISH_INTERVAL);
+
     return connectedPromise;
+  }
+
+  getLastPrices(): LivePrice[] {
+    return this.coins.map((coin) => {
+      const summary = this.tradesSummaries.get(coin.name);
+      return {
+        coinId: coin.id,
+        price: summary ? summary.last.toString() : null,
+      };
+    });
+  }
+
+  private startSubscriptions() {
+    for (const coin of this.coins)
+      this.ws.send(
+        JSON.stringify({
+          type: "subscribe",
+          symbol: toSubscriptionFormat(coin.name),
+        }),
+      );
   }
 
   private async publish() {
@@ -87,8 +119,6 @@ class TradeFeed {
         const listeners = this.subscriptions.get(coin);
         for (const listener of listeners) await listener(summary);
       }
-
-    this.tradesSummaries = new Map();
   }
 
   subscribe(coin: string, listener: TradeListener): UnSubFn {

@@ -33,10 +33,8 @@ export async function getMyHoldingHandler(
   return await getHolding(req.user.id);
 }
 
-export async function getMyOrdersHandler(
-  req: FastifyRequest<{ Querystring: GetOrdersQueryParams }>,
-) {
-  return await getOrdersForUser(req.user.id, req.query.active);
+export async function getMyOrdersHandler(req: FastifyRequest) {
+  return await getOrdersForUser(req.user.id);
 }
 export async function getMyOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,

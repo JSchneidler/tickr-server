@@ -21,6 +21,7 @@ export const coinResponse = TObj({
   externalId: TStr(),
   name: TStr(),
   displayName: TStr(),
+  imageUrl: TStr(),
   description: Union([TStr(), Null()]),
   createdAt: TStr(),
   updatedAt: TStr(),
