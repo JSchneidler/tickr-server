@@ -22,6 +22,7 @@ export type GetHoldingParams = Static<typeof getHoldingParams>;
 
 export const updateHoldingRequestBody = TObj({
   shares: Decimal,
+  cost: Decimal,
 });
 export type UpdateHoldingRequestBody = Static<typeof updateHoldingRequestBody>;
 

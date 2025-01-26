@@ -119,6 +119,11 @@ class TradeFeed {
         const listeners = this.subscriptions.get(coin);
         for (const listener of listeners) await listener(summary);
       }
+
+    this.tradesSummaries.forEach((summary) => {
+      summary.high = summary.last;
+      summary.low = summary.last;
+    });
   }
 
   subscribe(coin: string, listener: TradeListener): UnSubFn {
@@ -126,13 +131,13 @@ class TradeFeed {
       this.subscriptions.get(coin).push(listener);
     else {
       this.subscriptions.set(coin, [listener]);
-      this.ws.send(
-        JSON.stringify({
-          type: "subscribe",
-          symbol: toSubscriptionFormat(coin),
-        }),
-      );
-      console.log(`Subscribed to ${coin}`);
+      // this.ws.send(
+      //   JSON.stringify({
+      //     type: "subscribe",
+      //     symbol: toSubscriptionFormat(coin),
+      //   }),
+      // );
+      // console.log(`Subscribed to ${coin}`);
     }
 
     return () => {
@@ -148,14 +153,14 @@ class TradeFeed {
       );
 
       if (this.subscriptions.get(coin).length === 0) {
-        this.ws.send(
-          JSON.stringify({
-            type: "unsubscribe",
-            symbol: toSubscriptionFormat(coin),
-          }),
-        );
+        // this.ws.send(
+        //   JSON.stringify({
+        //     type: "unsubscribe",
+        //     symbol: toSubscriptionFormat(coin),
+        //   }),
+        // );
         this.subscriptions.delete(coin);
-        console.log(`Unsubscribed from ${coin}`);
+        // console.log(`Unsubscribed from ${coin}`);
       }
     }
   }

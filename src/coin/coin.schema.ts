@@ -16,7 +16,15 @@ export const getCoinParams = TObj({
 });
 export type GetCoinParams = Static<typeof getCoinParams>;
 
-export const coinResponse = TObj({
+export const getCoinHistoricalDataParams = TObj({
+  ...getCoinParams.properties,
+  daysAgo: TNum(),
+});
+export type GetCoinHistoricalDataParams = Static<
+  typeof getCoinHistoricalDataParams
+>;
+
+export const coin = TObj({
   id: coinId,
   externalId: TStr(),
   name: TStr(),
@@ -27,6 +35,21 @@ export const coinResponse = TObj({
   updatedAt: TStr(),
   deletedAt: Union([TStr(), Null()]),
 });
+
+const priceInfo = TObj({
+  currentPrice: Union([TStr(), Null()]),
+  dayHigh: Union([TStr(), Null()]),
+  dayLow: Union([TStr(), Null()]),
+  change: Union([TStr(), Null()]),
+  changePercent: Union([TStr(), Null()]),
+});
+
+export const coinResponse = TObj({
+  ...coin.properties,
+  ...priceInfo.properties,
+});
+export type CoinResponse = Static<typeof coinResponse>;
+
 export const coinsResponse = TArr(coinResponse);
 
 const historicalData = TArr(TArr(TNum(), { maxItems: 2, minItems: 2 }));
@@ -38,19 +61,3 @@ export const coinHistoricalDataResponse = TObj({
 export type CoinHistoricalDataResponse = Static<
   typeof coinHistoricalDataResponse
 >;
-
-const priceInfoResponse = TObj({
-  currentPrice: Union([TStr(), Null()]),
-  openPrice: Union([TStr(), Null()]),
-  dayHigh: Union([TStr(), Null()]),
-  dayLow: Union([TStr(), Null()]),
-  previousClose: Union([TStr(), Null()]),
-  change: Union([TStr(), Null()]),
-  changePercent: Union([TStr(), Null()]),
-});
-
-export const fullCoinResponse = TObj({
-  ...coinResponse.properties,
-  ...priceInfoResponse.properties,
-});
-export type FullCoinResponse = Static<typeof fullCoinResponse>;

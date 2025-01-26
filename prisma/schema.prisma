@@ -72,6 +72,7 @@ model AccessToken {
 model Holding {
   id     Int     @id @default(autoincrement())
   shares Decimal
+  cost   Decimal
 
   Coin   Coin @relation(fields: [coinId], references: [id])
   coinId Int

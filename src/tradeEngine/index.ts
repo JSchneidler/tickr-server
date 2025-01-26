@@ -80,16 +80,16 @@ class TradeEngine {
         coin,
         summary,
       ),
-      this.processStopOrders(
-        orders.filter((order) => order.type === OrderType.STOP),
-        coin,
-        summary,
-      ),
-      this.processTrailingStopOrders(
-        orders.filter((order) => order.type === OrderType.TRAILING_STOP),
-        coin,
-        summary,
-      ),
+      // this.processStopOrders(
+      //   orders.filter((order) => order.type === OrderType.STOP),
+      //   coin,
+      //   summary
+      // ),
+      // this.processTrailingStopOrders(
+      //   orders.filter((order) => order.type === OrderType.TRAILING_STOP),
+      //   coin,
+      //   summary
+      // ),
     ]);
   }
 
@@ -115,15 +115,12 @@ class TradeEngine {
   private async fillBuyOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
     const user = await getUser(order.userId);
 
-    let cost;
-    if (order.shares) {
-      cost = order.shares.mul(price).toDecimalPlaces(2);
-      if (user.balance.lessThan(cost)) return;
-    } else if (order.price) {
-      if (order.price.gt(user.balance)) return;
-      cost = order.price;
-      order.shares = cost.div(price);
-    }
+    const cost = order.shares
+      ? order.shares.mul(price).toDecimalPlaces(2)
+      : order.price;
+    if (user.balance.lessThan(cost)) return;
+
+    if (!order.shares) order.shares = cost.div(price);
 
     await this.fillOrder(order, coin, price, cost);
 
@@ -134,38 +131,53 @@ class TradeEngine {
       where,
     });
 
-    const shares = {
+    const updates: Prisma.HoldingUpdateInput = {
       shares: holding ? holding.shares.add(order.shares) : order.shares,
+      cost: holding ? holding.cost.add(cost) : cost,
     };
     await db.holding.upsert({
       where,
-      create: { ...shares, coinId: coin.id, userId: order.userId },
-      update: shares,
+      create: { ...updates, coinId: coin.id, userId: order.userId },
+      update: updates,
     });
 
     await updateUser(order.userId, {
-      balance: user.balance.sub(cost).toDecimalPlaces(2),
+      balance: { decrement: cost }, // TODO: Causing precision errors?
     });
   }
 
   private async fillSellOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
-    // TODO: Check if selling by total cost or shares
-    const cost = order.shares.mul(price).toDecimalPlaces(2);
+    const user = await getUser(order.userId);
+
+    const profit = order.shares
+      ? order.shares.mul(price).toDecimalPlaces(2)
+      : order.price;
+
+    if (!order.shares) order.shares = profit.div(price);
 
     const holding = await db.holding.findFirstOrThrow({
       where: { coinId: order.coinId },
     });
 
-    await this.fillOrder(order, coin, price, cost);
+    if (holding.shares.lt(order.shares)) return;
+
+    const cost = holding.cost
+      .div(holding.shares)
+      .mul(order.shares)
+      .toDecimalPlaces(2);
+
+    await this.fillOrder(order, coin, price, profit);
 
     if (holding.shares.equals(order.shares)) await deleteHolding(holding.id);
     else
       await updateHolding(holding.id, {
-        shares: holding.shares.sub(order.shares),
+        shares: { decrement: order.shares },
+        cost: { decrement: cost },
       });
 
-    const user = await getUser(order.userId);
-    await updateUser(order.userId, { balance: user.balance.add(cost) });
+    await updateUser(order.userId, {
+      balance: { increment: cost }, // TODO: Causing precision errors?
+    });
   }
 
   private async processMarketOrders(
@@ -206,20 +218,20 @@ class TradeEngine {
       }
     }
   }
-  private async processStopOrders(
-    orders: Order[],
-    coin: Coin,
-    summary: TradesSummary,
-  ) {
-    if (orders.length === 0) return;
-  }
-  private async processTrailingStopOrders(
-    orders: Order[],
-    coin: Coin,
-    summary: TradesSummary,
-  ) {
-    if (orders.length === 0) return;
-  }
+  // private async processStopOrders(
+  //   orders: Order[],
+  //   coin: Coin,
+  //   summary: TradesSummary
+  // ) {
+  //   if (orders.length === 0) return;
+  // }
+  // private async processTrailingStopOrders(
+  //   orders: Order[],
+  //   coin: Coin,
+  //   summary: TradesSummary
+  // ) {
+  //   if (orders.length === 0) return;
+  // }
 }
 
 export default new TradeEngine();

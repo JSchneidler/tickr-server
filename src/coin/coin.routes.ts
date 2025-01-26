@@ -8,9 +8,10 @@ import {
   getCoinHistoricalDataHandler,
 } from "./coin.controller";
 import {
-  fullCoinResponse,
-  getCoinParams,
   coinsResponse,
+  getCoinParams,
+  coinResponse,
+  getCoinHistoricalDataParams,
   coinHistoricalDataResponse,
 } from "./coin.schema";
 
@@ -35,7 +36,7 @@ export default function (f: FastifyInstance) {
         params: getCoinParams,
         response: {
           ...errorResponseSchemas,
-          200: fullCoinResponse,
+          200: coinResponse,
         },
       },
     },
@@ -43,10 +44,10 @@ export default function (f: FastifyInstance) {
   );
 
   f.get(
-    "/:coinId/historical",
+    "/:coinId/historical/:daysAgo",
     {
       schema: {
-        params: getCoinParams,
+        params: getCoinHistoricalDataParams,
         response: {
           ...errorResponseSchemas,
           200: coinHistoricalDataResponse,

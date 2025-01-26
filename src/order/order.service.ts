@@ -30,6 +30,7 @@ export async function createOrder(
     });
 
     if (
+      orderInput.shares &&
       holding.shares.lessThan(
         sharesBeingSoldAgg._sum.shares
           ? sharesBeingSoldAgg._sum.shares.add(orderInput.shares)

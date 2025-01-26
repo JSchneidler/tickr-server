@@ -22,7 +22,7 @@ interface PriceResponse {
 }
 
 type CoinOHLCResponse = [number, number, number, number, number][];
-interface CoinOHLC {
+export interface CoinOHLC {
   open: number;
   dayHigh: number;
   dayLow: number;

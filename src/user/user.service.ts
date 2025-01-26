@@ -29,7 +29,7 @@ export async function createUser(
     },
   });
 
-  const { token } = await createToken("default", user);
+  const { token } = await createToken("register", user);
 
   return { user, token };
 }

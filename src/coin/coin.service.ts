@@ -1,8 +1,13 @@
 import { Prisma, Coin } from "@prisma/client";
 
 import db from "../db";
-import { CoinHistoricalDataResponse, FullCoinResponse } from "./coin.schema";
-import { getHistoricalData, getOHLC, getPrice } from "../apis/coingecko_api";
+import { CoinHistoricalDataResponse, CoinResponse } from "./coin.schema";
+import {
+  CoinOHLC,
+  getHistoricalData,
+  getOHLC,
+  getPrice,
+} from "../apis/coingecko_api";
 
 function calculateChange(open: number, current: number) {
   return new Prisma.Decimal(current).sub(open).toDecimalPlaces(2).toString();
@@ -25,11 +30,32 @@ export async function createCoin(
   });
 }
 
-export async function getCoins(): Promise<Coin[]> {
-  return await db.coin.findMany({ take: 100 });
+export async function getCoins(): Promise<CoinResponse[]> {
+  const coins = await db.coin.findMany({ take: 100 });
+
+  const promises: Promise<CoinOHLC | string>[] = [];
+
+  for (const coin of coins) {
+    promises.push(getPrice(coin.externalId));
+    promises.push(getOHLC(coin.externalId));
+  }
+  const responses = await Promise.all(promises);
+
+  return coins.map((coin, i) => {
+    const currentPrice = responses[i * 2] as string;
+    const ohlc = responses[i * 2 + 1] as CoinOHLC;
+    return {
+      ...coin,
+      currentPrice,
+      dayHigh: ohlc.dayHigh.toString(),
+      dayLow: ohlc.dayLow.toString(),
+      change: calculateChange(ohlc.open, +currentPrice),
+      changePercent: calculateChangePercent(ohlc.open, +currentPrice),
+    };
+  });
 }
 
-export async function getCoin(id: number): Promise<FullCoinResponse> {
+export async function getCoin(id: number): Promise<CoinResponse> {
   const coin = await db.coin.findUniqueOrThrow({ where: { id } });
 
   const ohlc = await getOHLC(coin.externalId);
@@ -38,10 +64,8 @@ export async function getCoin(id: number): Promise<FullCoinResponse> {
   return {
     ...coin,
     currentPrice,
-    openPrice: ohlc.open.toString(),
     dayHigh: ohlc.dayHigh.toString(),
     dayLow: ohlc.dayLow.toString(),
-    previousClose: ohlc.previousClose.toString(),
     change: calculateChange(ohlc.open, +currentPrice),
     changePercent: calculateChangePercent(ohlc.open, +currentPrice),
   };
@@ -49,10 +73,11 @@ export async function getCoin(id: number): Promise<FullCoinResponse> {
 
 export async function getCoinHistoricalData(
   coinId: number,
+  daysAgo = 1,
 ): Promise<CoinHistoricalDataResponse> {
   const coin = await db.coin.findUniqueOrThrow({ where: { id: coinId } });
 
-  const response = await getHistoricalData(coin.externalId, 1);
+  const response = await getHistoricalData(coin.externalId, daysAgo);
   return {
     prices: response.prices,
     marketCaps: response.market_caps,

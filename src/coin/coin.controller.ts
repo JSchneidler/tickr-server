@@ -1,7 +1,7 @@
 import { FastifyRequest } from "fastify";
 
 import { getCoin, getCoinHistoricalData, getCoins } from "./coin.service";
-import { GetCoinParams } from "./coin.schema";
+import { GetCoinHistoricalDataParams, GetCoinParams } from "./coin.schema";
 
 export async function getCoinsHandler() {
   return await getCoins();
@@ -14,7 +14,7 @@ export async function getCoinHandler(
 }
 
 export async function getCoinHistoricalDataHandler(
-  req: FastifyRequest<{ Params: GetCoinParams }>,
+  req: FastifyRequest<{ Params: GetCoinHistoricalDataParams }>,
 ) {
-  return await getCoinHistoricalData(req.params.coinId);
+  return await getCoinHistoricalData(req.params.coinId, req.params.daysAgo);
 }

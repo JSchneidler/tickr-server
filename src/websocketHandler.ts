@@ -8,7 +8,18 @@ enum WebSocketMessageType {
 }
 
 const websocketHandler: WebsocketHandler = (socket, req) => {
-  console.log(`User connected: ${req.user.name}(${req.user.id})`);
+  if (req.user) {
+    console.log(`User connected: ${req.user.name}(${req.user.id})`);
+
+    tradeEngine.addLiveUser(req.user.id, (order) => {
+      socket.send(
+        JSON.stringify({
+          type: WebSocketMessageType.ORDER_FILLED,
+          payload: order,
+        }),
+      );
+    });
+  } else console.log(`Guest connected: ${req.ip}`);
 
   setInterval(() => {
     socket.send(
@@ -19,22 +30,15 @@ const websocketHandler: WebsocketHandler = (socket, req) => {
     );
   }, 1000);
 
-  tradeEngine.addLiveUser(req.user.id, (order) => {
-    socket.send(
-      JSON.stringify({
-        type: WebSocketMessageType.ORDER_FILLED,
-        payload: order,
-      }),
-    );
-  });
-
   socket.on("error", (error) => {
     console.error(error);
   });
 
   socket.on("close", () => {
-    console.log("Client disconnected");
-    tradeEngine.removeLiveUser(req.user.id);
+    if (req.user) {
+      console.log(`User disconnected: ${req.user.name}(${req.user.id})`);
+      tradeEngine.removeLiveUser(req.user.id);
+    } else console.log(`Guest disconnected: ${req.ip}`);
   });
 };
 
