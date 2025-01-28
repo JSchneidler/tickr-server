@@ -28,7 +28,7 @@ class TradeEngine {
 
   addOrder(order: Order, coin: Coin) {
     if (this.orders.has(coin.name)) {
-      this.orders.get(coin.name).orders.push(order);
+      this.orders.get(coin.name)!.orders.push(order); // eslint-disable-line @typescript-eslint/no-non-null-assertion
     } else {
       this.orders.set(coin.name, {
         orders: [order],
@@ -43,14 +43,16 @@ class TradeEngine {
   }
 
   removeOrder(order: Order, coin: Coin) {
-    const subscription = this.orders.get(coin.name);
-    subscription.orders = this.orders
-      .get(coin.name)
-      ?.orders.filter((o) => o.id !== order.id);
+    if (this.orders.has(coin.name)) {
+      const subscription = this.orders.get(coin.name)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      subscription.orders = subscription.orders.filter(
+        (o) => o.id !== order.id,
+      );
 
-    if (subscription.orders.length === 0) {
-      subscription.unsubscribe();
-      this.orders.delete(coin.name);
+      if (subscription.orders.length === 0) {
+        subscription.unsubscribe();
+        this.orders.delete(coin.name);
+      }
     }
   }
 
@@ -67,30 +69,22 @@ class TradeEngine {
     //   `${this.orders.get(coin).orders.length.toString()} ${coin} orders queued`
     // );
 
-    const orders = this.orders.get(coin.name).orders;
+    if (this.orders.has(coin.name)) {
+      const orders = this.orders.get(coin.name)!.orders; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
-    await Promise.all([
-      this.processMarketOrders(
-        orders.filter((order) => order.type === OrderType.MARKET),
-        coin,
-        summary,
-      ),
-      this.processLimitOrders(
-        orders.filter((order) => order.type === OrderType.LIMIT),
-        coin,
-        summary,
-      ),
-      // this.processStopOrders(
-      //   orders.filter((order) => order.type === OrderType.STOP),
-      //   coin,
-      //   summary
-      // ),
-      // this.processTrailingStopOrders(
-      //   orders.filter((order) => order.type === OrderType.TRAILING_STOP),
-      //   coin,
-      //   summary
-      // ),
-    ]);
+      await Promise.all([
+        this.processMarketOrders(
+          orders.filter((order) => order.type === OrderType.MARKET),
+          coin,
+          summary,
+        ),
+        this.processLimitOrders(
+          orders.filter((order) => order.type === OrderType.LIMIT),
+          coin,
+          summary,
+        ),
+      ]);
+    }
   }
 
   private async fillOrder(
@@ -106,7 +100,7 @@ class TradeEngine {
       totalPrice,
     });
     if (this.liveUsers.has(order.userId))
-      this.liveUsers.get(order.userId)(updatedOrder);
+      this.liveUsers.get(order.userId)!(updatedOrder); // eslint-disable-line @typescript-eslint/no-non-null-assertion
     // console.log(
     //   `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`
     // );
@@ -115,9 +109,11 @@ class TradeEngine {
   private async fillBuyOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
     const user = await getUser(order.userId);
 
-    const cost = order.shares
-      ? order.shares.mul(price).toDecimalPlaces(2)
-      : order.price;
+    // Either order.shares or order.price must exist
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const cost = (
+      order.shares ? order.shares.mul(price).toDecimalPlaces(2) : order.price
+    )!;
     if (user.balance.lessThan(cost)) return;
 
     if (!order.shares) order.shares = cost.div(price);
@@ -131,7 +127,7 @@ class TradeEngine {
       where,
     });
 
-    const updates: Prisma.HoldingUpdateInput = {
+    const updates = {
       shares: holding ? holding.shares.add(order.shares) : order.shares,
       cost: holding ? holding.cost.add(cost) : cost,
     };
@@ -147,11 +143,10 @@ class TradeEngine {
   }
 
   private async fillSellOrder(order: Order, coin: Coin, price: Prisma.Decimal) {
-    const user = await getUser(order.userId);
-
-    const profit = order.shares
-      ? order.shares.mul(price).toDecimalPlaces(2)
-      : order.price;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const profit = (
+      order.shares ? order.shares.mul(price).toDecimalPlaces(2) : order.price
+    )!;
 
     if (!order.shares) order.shares = profit.div(price);
 
@@ -206,32 +201,19 @@ class TradeEngine {
     if (orders.length === 0) return;
 
     for (const order of orders) {
+      const price = order.price!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
       switch (order.direction) {
         case OrderDirection.BUY:
-          if (summary.low.lte(order.price))
+          if (summary.low.lte(price))
             await this.fillBuyOrder(order, coin, summary.low);
           break;
         case OrderDirection.SELL:
-          if (summary.high.gte(order.price))
+          if (summary.high.gte(price))
             await this.fillSellOrder(order, coin, summary.high);
           break;
       }
     }
   }
-  // private async processStopOrders(
-  //   orders: Order[],
-  //   coin: Coin,
-  //   summary: TradesSummary
-  // ) {
-  //   if (orders.length === 0) return;
-  // }
-  // private async processTrailingStopOrders(
-  //   orders: Order[],
-  //   coin: Coin,
-  //   summary: TradesSummary
-  // ) {
-  //   if (orders.length === 0) return;
-  // }
 }
 
 export default new TradeEngine();

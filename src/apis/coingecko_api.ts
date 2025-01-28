@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-
 import env from "../env";
 
 interface CoinData {
@@ -15,11 +13,12 @@ interface CoinData {
   };
 }
 
-interface PriceResponse {
-  [key: string]: {
+type PriceResponse = Record<
+  string,
+  {
     usd: number;
-  };
-}
+  }
+>;
 
 type CoinOHLCResponse = [number, number, number, number, number][];
 export interface CoinOHLC {
@@ -29,7 +28,7 @@ export interface CoinOHLC {
   previousClose: number;
 }
 
-interface CoinHistoricalData {
+export interface CoinHistoricalData {
   prices: [number, number][];
   market_caps: [number, number][];
   total_volumes: [number, number][];
@@ -59,7 +58,9 @@ export async function getPrice(coinId: string): Promise<string> {
   const response = await fetch(request);
   const price = (await response.json()) as PriceResponse;
 
-  return new Prisma.Decimal(price[coinId].usd).toDecimalPlaces(2).toString();
+  if (!price[coinId]) throw Error("Failed to fetch coin price");
+
+  return price[coinId].usd.toString();
 }
 
 export async function getOHLC(coinId: string): Promise<CoinOHLC> {
@@ -67,7 +68,10 @@ export async function getOHLC(coinId: string): Promise<CoinOHLC> {
   const response = await fetch(request);
 
   const data = (await response.json()) as CoinOHLCResponse;
-  const latest = data[data.length - 1];
+
+  if (!data.length) throw Error("Failed to fetch coin OHLC");
+
+  const latest = data[data.length - 1]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
   return {
     open: latest[1],
@@ -77,13 +81,20 @@ export async function getOHLC(coinId: string): Promise<CoinOHLC> {
   };
 }
 
-export async function getHistoricalData(
-  coinId: string,
-  daysAgo: number,
-): Promise<CoinHistoricalData> {
+export async function getHistoricalData(coinId: string, daysAgo: number) {
+  function convertNums(data: [number, number]): [number, string] {
+    return [data[0], data[1].toString()];
+  }
+
   const request = baseRequest(
     `/coins/${coinId}/market_chart?vs_currency=usd&days=${daysAgo.toString()}`,
   );
   const response = await fetch(request);
-  return (await response.json()) as CoinHistoricalData;
+  const data = (await response.json()) as CoinHistoricalData;
+
+  return {
+    prices: data.prices.map(convertNums),
+    marketCaps: data.market_caps.map(convertNums),
+    totalVolumes: data.total_volumes.map(convertNums),
+  };
 }

@@ -1,23 +1,26 @@
 import { OrderDirection, OrderType, Prisma } from "@prisma/client";
 import {
   Object as TObj,
-  String as TStr,
   Number as TNum,
   Array as TArr,
-  Optional,
   Enum,
   Pick,
   Boolean,
-  Union,
-  Null,
   type Static,
+  Optional,
 } from "@sinclair/typebox";
 import { userId } from "../user/user.schema";
 import { coinId } from "../coin/coin.schema";
-import { Decimal, NullableDecimalType } from "../decimal-type";
+import { DateTime, Decimal, NullableDateTime, NullableDecimal } from "../types";
 
 // Prisma
-export type OrderCreateInput = Omit<Prisma.OrderCreateInput, "User" | "Coin">;
+export type OrderCreateInput = Omit<
+  Prisma.OrderCreateInput,
+  "User" | "Coin"
+> & {
+  shares?: string | Prisma.Decimal;
+  price?: string | Prisma.Decimal;
+};
 
 // API
 export const orderId = TNum();
@@ -48,12 +51,10 @@ export const orderResponse = TObj({
   id: orderId,
   userId,
   filled: Boolean(),
-  shares: Decimal,
-  price: NullableDecimalType,
-  sharePrice: NullableDecimalType, // TODO: Use decimal type?
-  totalPrice: NullableDecimalType,
-  createdAt: TStr(),
-  updatedAt: TStr(),
-  deletedAt: Union([TStr(), Null()]),
+  sharePrice: NullableDecimal, // TODO: Use decimal type?
+  totalPrice: NullableDecimal,
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  deletedAt: NullableDateTime,
 });
 export const ordersResponse = TArr(orderResponse);

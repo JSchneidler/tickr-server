@@ -4,11 +4,11 @@ import {
   String as TStr,
   Number as TNum,
   Array as TArr,
-  Union,
-  Null,
   type Static,
 } from "@sinclair/typebox";
+
 import { userId } from "../user/user.schema";
+import { DateTime, NullableDateTime } from "../types";
 
 // Prisma
 export type TokenWithoutSensitive = Prisma.AccessTokenGetPayload<{
@@ -36,7 +36,7 @@ export const tokenResponse = TObj({
   ...createTokenRequestBody.properties,
   id: tokenId,
   userId: userId,
-  createdAt: TStr(),
-  revokedAt: Union([TStr(), Null()]),
+  createdAt: DateTime,
+  revokedAt: NullableDateTime,
 });
 export const tokensResponse = TArr(tokenResponse);

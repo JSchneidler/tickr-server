@@ -23,8 +23,6 @@ enum OrderDirection {
 enum OrderType {
   MARKET
   LIMIT
-  STOP
-  TRAILING_STOP
 }
 
 enum AdminActionType {

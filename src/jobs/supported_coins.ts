@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client";
-
 interface SupportedCoin {
   displayName: string;
   externalId: string;

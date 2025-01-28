@@ -4,7 +4,7 @@ import { createUser } from "../user/user.service";
 import { CreateUserRequestBody } from "../user/user.schema";
 import { LoginRequestBody } from "./auth.schema";
 import { login } from "./auth.service";
-import { revokeToken } from "../token/token.service";
+// import { revokeToken } from "../token/token.service";
 
 export async function registerHandler(
   req: FastifyRequest<{ Body: CreateUserRequestBody }>,

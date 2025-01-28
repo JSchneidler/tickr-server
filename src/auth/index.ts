@@ -1,5 +1,10 @@
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteGenericInterface,
+} from "fastify";
 import FastifyPlugin from "fastify-plugin";
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { pbkdf2, timingSafeEqual, randomBytes, createHash } from "node:crypto";
 import { promisify } from "node:util";
 import fastifyJwt, { JWT } from "@fastify/jwt";
@@ -12,16 +17,24 @@ import { getUser } from "../user/user.service";
 declare module "fastify" {
   interface FastifyRequest {
     jwt?: JWT;
+    user: UserWithoutSensitive | undefined;
   }
 
   export interface FastifyInstance {
-    authenticate: (req: FastifyRequest, rep: FastifyReply) => void;
+    authenticate: <T extends RouteGenericInterface>(
+      req: FastifyRequest<T>,
+      rep: FastifyReply,
+    ) => void;
+    admin: <T extends RouteGenericInterface>(
+      req: FastifyRequest<T>,
+      rep: FastifyReply,
+    ) => void;
   }
 }
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
-    user?: UserWithoutSensitive;
+    user: UserWithoutSensitive | undefined;
   }
 }
 
@@ -88,20 +101,34 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
   f.addHook("onRequest", async (req: FastifyRequest) => {
     try {
       await req.jwtVerify();
-      req.user = await getUser(req.user.id);
+      req.user = await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
     } catch (err) {
       f.log.error(err);
-      req.user = null;
     }
   });
-  // f.decorateRequest("user") // TODO: Add full Prisma user as req.user
-  f.decorate("authenticate", async (req: FastifyRequest, rep: FastifyReply) => {
-    try {
-      await req.jwtVerify();
-      req.user = await getUser(req.user.id);
-    } catch (err) {
-      f.log.error(err);
-      rep.status(401).send(err);
-    }
-  });
+  f.decorate(
+    "authenticate",
+    async <T extends RouteGenericInterface>(
+      req: FastifyRequest<T>,
+      rep: FastifyReply,
+    ) => {
+      try {
+        await req.jwtVerify();
+        req.user = await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      } catch (err) {
+        f.log.error(err);
+        rep.status(401).send(err);
+      }
+    },
+  );
+  f.decorate(
+    "admin",
+    async <T extends RouteGenericInterface>(
+      req: FastifyRequest<T>,
+      rep: FastifyReply,
+    ) => {
+      f.authenticate(req, rep);
+      if (req.user?.role !== "ADMIN") rep.status(401).send();
+    },
+  );
 });

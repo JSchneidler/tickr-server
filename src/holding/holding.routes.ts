@@ -12,7 +12,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -26,7 +26,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:holdingId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getHoldingParams,
         response: {

@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
 import {
@@ -19,7 +18,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -33,7 +32,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:holdingId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getHoldingParams,
         response: {
@@ -48,7 +47,7 @@ export default function (f: FastifyInstance) {
   f.patch(
     "/:holdingId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getHoldingParams,
         body: updateHoldingRequestBody,
@@ -64,7 +63,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:holdingId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getHoldingParams,
         response: {

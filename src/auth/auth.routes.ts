@@ -41,10 +41,10 @@ export default function (f: FastifyInstance) {
   f.post(
     "/logout",
     {
+      onRequest: [f.authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
-          // 200: userResponse,
         },
       },
     },

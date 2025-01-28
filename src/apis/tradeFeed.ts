@@ -1,8 +1,9 @@
 import WebSocket from "ws";
-import { Coin, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import env from "../env";
 import { getCoins } from "../coin/coin.service";
+import { CoinResponse } from "../coin/coin.schema";
 
 interface Trade {
   c: number[] | undefined; // Trade conditions
@@ -33,7 +34,7 @@ export interface TradesSummary {
 
 interface LivePrice {
   coinId: number;
-  price: string | null;
+  price: string;
 }
 
 const FINNHUB_WEBSOCKET_URL = "wss://ws.finnhub.io";
@@ -44,7 +45,7 @@ const PUBLISH_INTERVAL = 1000; // Remove interval, publish immediately somehow
 class TradeFeed {
   private ws = new WebSocket(URL, {});
 
-  private coins: Coin[] = [];
+  private coins: CoinResponse[] = [];
   private subscriptions = new Map<string, TradeListener[]>();
   private tradesSummaries = new Map<string, TradesSummary>();
 
@@ -66,7 +67,7 @@ class TradeFeed {
             const coin = fromSubscriptionFormat(trade.s);
             const price = new Prisma.Decimal(trade.p);
             if (this.tradesSummaries.has(coin)) {
-              const summary = this.tradesSummaries.get(coin);
+              const summary = this.tradesSummaries.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
               summary.last = price;
               if (summary.low.greaterThan(trade.p)) summary.low = price;
               else if (summary.high.lessThan(trade.p)) summary.high = price;
@@ -94,13 +95,15 @@ class TradeFeed {
   }
 
   getLastPrices(): LivePrice[] {
-    return this.coins.map((coin) => {
-      const summary = this.tradesSummaries.get(coin.name);
-      return {
-        coinId: coin.id,
-        price: summary ? summary.last.toString() : null,
-      };
-    });
+    const last = [];
+    for (const coin of this.coins)
+      if (this.tradesSummaries.has(coin.name))
+        last.push({
+          coinId: coin.id,
+          price: this.tradesSummaries.get(coin.name)!.last.toString(), // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        });
+
+    return last;
   }
 
   private startSubscriptions() {
@@ -116,7 +119,7 @@ class TradeFeed {
   private async publish() {
     for (const [coin, summary] of this.tradesSummaries)
       if (this.subscriptions.has(coin)) {
-        const listeners = this.subscriptions.get(coin);
+        const listeners = this.subscriptions.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
         for (const listener of listeners) await listener(summary);
       }
 
@@ -128,7 +131,7 @@ class TradeFeed {
 
   subscribe(coin: string, listener: TradeListener): UnSubFn {
     if (this.subscriptions.has(coin))
-      this.subscriptions.get(coin).push(listener);
+      this.subscriptions.get(coin)!.push(listener); // eslint-disable-line @typescript-eslint/no-non-null-assertion
     else {
       this.subscriptions.set(coin, [listener]);
       // this.ws.send(
@@ -147,12 +150,13 @@ class TradeFeed {
 
   private unsubscribe(coin: string, listener: TradeListener) {
     if (this.subscriptions.has(coin)) {
+      const listeners = this.subscriptions.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
       this.subscriptions.set(
         coin,
-        this.subscriptions.get(coin).filter((l) => listener !== l),
+        listeners.filter((l) => listener !== l),
       );
 
-      if (this.subscriptions.get(coin).length === 0) {
+      if (listeners.length === 0) {
         // this.ws.send(
         //   JSON.stringify({
         //     type: "unsubscribe",

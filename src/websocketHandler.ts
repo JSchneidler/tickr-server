@@ -9,7 +9,7 @@ enum WebSocketMessageType {
 
 const websocketHandler: WebsocketHandler = (socket, req) => {
   if (req.user) {
-    console.log(`User connected: ${req.user.name}(${req.user.id})`);
+    console.log(`User connected: ${req.user.name}(${req.user.id.toString()})`);
 
     tradeEngine.addLiveUser(req.user.id, (order) => {
       socket.send(
@@ -36,7 +36,9 @@ const websocketHandler: WebsocketHandler = (socket, req) => {
 
   socket.on("close", () => {
     if (req.user) {
-      console.log(`User disconnected: ${req.user.name}(${req.user.id})`);
+      console.log(
+        `User disconnected: ${req.user.name}(${req.user.id.toString()})`,
+      );
       tradeEngine.removeLiveUser(req.user.id);
     } else console.log(`Guest disconnected: ${req.ip}`);
   });

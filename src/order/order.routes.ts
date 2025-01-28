@@ -36,7 +36,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -50,7 +50,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:orderId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getOrderParams,
         response: {

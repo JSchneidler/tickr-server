@@ -6,7 +6,10 @@ import {
   Union,
   Null,
   type Static,
+  Tuple,
 } from "@sinclair/typebox";
+
+import { DateTime, NullableDateTime } from "../types";
 
 // API
 export const coinId = TNum();
@@ -30,10 +33,10 @@ export const coin = TObj({
   name: TStr(),
   displayName: TStr(),
   imageUrl: TStr(),
-  description: Union([TStr(), Null()]),
-  createdAt: TStr(),
-  updatedAt: TStr(),
-  deletedAt: Union([TStr(), Null()]),
+  description: TStr(),
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  deletedAt: NullableDateTime,
 });
 
 const priceInfo = TObj({
@@ -52,7 +55,7 @@ export type CoinResponse = Static<typeof coinResponse>;
 
 export const coinsResponse = TArr(coinResponse);
 
-const historicalData = TArr(TArr(TNum(), { maxItems: 2, minItems: 2 }));
+const historicalData = TArr(Tuple([TNum(), TStr()]));
 export const coinHistoricalDataResponse = TObj({
   prices: historicalData,
   marketCaps: historicalData,

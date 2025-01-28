@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import {
   Object as TObj,
   String as TStr,
@@ -7,11 +7,11 @@ import {
   Partial,
   Required,
   Omit,
-  Union,
-  Null,
   type Static,
+  Enum,
 } from "@sinclair/typebox";
-import { Decimal } from "../decimal-type";
+
+import { DateTime, Decimal, NullableDateTime } from "../types";
 
 // Prisma
 export type UserWithoutSensitive = Prisma.UserGetPayload<{
@@ -44,7 +44,7 @@ export type CreateUserRequestBody = Static<typeof createUserRequestBody>;
 
 export const updateUserRequestBody = TObj({
   ...Partial(createUserRequestBody).properties,
-  role: TStr(),
+  role: Enum(Role),
 });
 export type UpdateUserRequestBody = Static<typeof updateUserRequestBody>;
 
@@ -53,8 +53,8 @@ export const userResponse = TObj({
   id: userId,
   deposits: Decimal,
   balance: Decimal,
-  createdAt: TStr(),
-  updatedAt: TStr(),
-  deletedAt: Union([TStr(), Null()]),
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  deletedAt: NullableDateTime,
 });
 export const usersResponse = TArr(userResponse);

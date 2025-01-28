@@ -77,12 +77,7 @@ export async function getCoinHistoricalData(
 ): Promise<CoinHistoricalDataResponse> {
   const coin = await db.coin.findUniqueOrThrow({ where: { id: coinId } });
 
-  const response = await getHistoricalData(coin.externalId, daysAgo);
-  return {
-    prices: response.prices,
-    marketCaps: response.market_caps,
-    totalVolumes: response.total_volumes,
-  };
+  return await getHistoricalData(coin.externalId, daysAgo);
 }
 
 export async function updateCoin(

@@ -9,14 +9,14 @@ import { getHoldingsForUser, getHolding } from "../holding/holding.service";
 import { GetHoldingParams } from "../holding/holding.schema";
 
 import { getOrdersForUser, getOrder } from "../order/order.service";
-import { GetOrderParams, GetOrdersQueryParams } from "../order/order.schema";
+import { GetOrderParams } from "../order/order.schema";
 
 export async function getMeHandler(req: FastifyRequest) {
-  return await getUser(req.user.id);
+  return await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 
 export async function getMyTokensHandler(req: FastifyRequest) {
-  return await getTokensForUser(req.user.id);
+  return await getTokensForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 export async function getMyTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
@@ -25,19 +25,19 @@ export async function getMyTokenHandler(
 }
 
 export async function getMyHoldingsHandler(req: FastifyRequest) {
-  return await getHoldingsForUser(req.user.id);
+  return await getHoldingsForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 export async function getMyHoldingHandler(
   req: FastifyRequest<{ Params: GetHoldingParams }>,
 ) {
-  return await getHolding(req.user.id);
+  return await getHolding(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 
 export async function getMyOrdersHandler(req: FastifyRequest) {
-  return await getOrdersForUser(req.user.id);
+  return await getOrdersForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }
 export async function getMyOrderHandler(
   req: FastifyRequest<{ Params: GetOrderParams }>,
 ) {
-  return await getOrder(req.user.id);
+  return await getOrder(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 }

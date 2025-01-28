@@ -1,16 +1,13 @@
 import {
   Object as TObj,
-  String as TStr,
   Array as TArr,
   Number as TNum,
-  Union,
-  Null,
   type Static,
 } from "@sinclair/typebox";
 
 import { userId } from "../user/user.schema";
 import { coinId } from "../coin/coin.schema";
-import { Decimal } from "../decimal-type";
+import { DateTime, Decimal, NullableDateTime } from "../types";
 
 // API
 export const holdingId = TNum();
@@ -31,8 +28,8 @@ export const holdingResponse = TObj({
   id: holdingId,
   userId,
   coinId,
-  createdAt: TStr(),
-  updatedAt: TStr(),
-  deletedAt: Union([TStr(), Null()]),
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  deletedAt: NullableDateTime,
 });
 export const holdingsResponse = TArr(holdingResponse);

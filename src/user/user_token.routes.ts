@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
 import {
@@ -17,7 +16,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -31,7 +30,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:tokenId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getTokenParams,
         response: {
@@ -46,7 +45,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:tokenId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getTokenParams,
         response: {

@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { Type } from "@sinclair/typebox";
 
 import {
   getUsersHandler,
@@ -27,7 +26,7 @@ export default async function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -41,7 +40,7 @@ export default async function (f: FastifyInstance) {
   f.get(
     "/:userId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getUserParams,
         response: {
@@ -56,7 +55,7 @@ export default async function (f: FastifyInstance) {
   f.patch(
     "/:userId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getUserParams,
         body: updateUserRequestBody,
@@ -72,7 +71,7 @@ export default async function (f: FastifyInstance) {
   f.delete(
     "/:userId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [f.admin],
       schema: {
         params: getUserParams,
         response: {
