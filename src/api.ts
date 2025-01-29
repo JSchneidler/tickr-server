@@ -10,15 +10,15 @@ import holdingRoutes from "./holding/holding.routes";
 import orderRoutes from "./order/order.routes";
 import websocketHandler from "./websocketHandler";
 
-export default async function (f: FastifyInstance) {
+export default function (f: FastifyInstance) {
   f.get("/ws", { websocket: true }, websocketHandler);
 
-  await f.register(authRoutes, { prefix: "/auth" });
-  await f.register(meRoutes, { prefix: "/me" });
-  await f.register(userRoutes, { prefix: "/users" });
-  // await f.register(adminRoutes, { prefix: "/admin" });
-  await f.register(coinRoutes, { prefix: "/coins" });
-  await f.register(tokenRoutes, { prefix: "/tokens" });
-  await f.register(holdingRoutes, { prefix: "/holdings" });
-  await f.register(orderRoutes, { prefix: "/orders" });
+  f.register(authRoutes, { prefix: "/auth" });
+  f.register(meRoutes, { prefix: "/me" });
+  f.register(userRoutes, { prefix: "/users" });
+  // f.register(adminRoutes, { prefix: "/admin" });
+  f.register(coinRoutes, { prefix: "/coins" });
+  f.register(tokenRoutes, { prefix: "/tokens" });
+  f.register(holdingRoutes, { prefix: "/holdings" });
+  f.register(orderRoutes, { prefix: "/orders" });
 }

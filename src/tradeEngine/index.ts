@@ -171,7 +171,7 @@ class TradeEngine {
       });
 
     await updateUser(order.userId, {
-      balance: { increment: cost }, // TODO: Causing precision errors?
+      balance: { increment: profit }, // TODO: Causing precision errors?
     });
   }
 

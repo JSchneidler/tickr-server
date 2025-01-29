@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch ./src/index.ts",
     "db:migrate": "prisma db push",
-    "db:fetch_symbols": "tsx ./src/jobs/fetch_symbols.ts",
+    "db:fetch_coins": "tsx ./src/jobs/fetch_coins.ts",
     "start": "tsx ./src/index.ts",
     "lint": "tsc --noEmit && eslint . && pnpm format",
     "format": "prettier . --write",
