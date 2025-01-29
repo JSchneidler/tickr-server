@@ -8,10 +8,10 @@ on:
       - completed
 
 env:
-  ECR_REPOSITORY: tickr # Change this to your ECR repository name
+  ECR_REPOSITORY: tickr
   # ECS_SERVICE: your-service-name          # Change this to your ECS service name
   # ECS_CLUSTER: your-cluster-name          # Change this to your ECS cluster name
-  CONTAINER_NAME: tickr # Change this to your container name
+  CONTAINER_NAME: tickr
 
 jobs:
   deploy:
@@ -20,7 +20,7 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write # Needed for AWS OIDC authentication
+      id-token: write
 
     steps:
       - name: Configure AWS credentials
