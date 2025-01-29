@@ -2,14 +2,13 @@
   "extends": "@tsconfig/node22/tsconfig.json",
 
   "include": ["**/*.ts", "**/*.js"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "build"],
 
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
     "checkJs": true,
-    "noEmit": true,
     "sourceMap": true,
     "noUncheckedIndexedAccess": true
   }

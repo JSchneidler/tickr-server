@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
+    "build": "tsc --outDir build",
     "dev": "tsx watch ./src/index.ts",
     "db:migrate": "prisma db push",
     "db:fetch_coins": "tsx ./src/jobs/fetch_coins.ts",
