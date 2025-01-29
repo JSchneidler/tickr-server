@@ -11,7 +11,7 @@ env:
   ECR_REPOSITORY: tickr
   ECS_SERVICE: tickr-api
   ECS_CLUSTER: tickr-api
-  ECS_TASK_DEFINITION: tickr-api
+  ECS_TASK_DEFINITION: arn:aws:ecs:us-east-1:584676595568:task-definition/tickr-api:1
   CONTAINER_NAME: app
 
 jobs:
