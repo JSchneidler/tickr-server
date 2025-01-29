@@ -7,7 +7,6 @@ dotenv.config();
 const envSchema = Type.Object({
   COINGECKO_API_KEY: Type.String(),
   FINNHUB_API_KEY: Type.String(),
-  POLYGON_API_KEY: Type.String(),
   JWT_SECRET: Type.String(),
 });
 
