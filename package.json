@@ -4,19 +4,19 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc --outDir build",
     "dev": "tsx watch ./src/index.ts",
     "db:migrate": "prisma db push",
     "db:fetch_coins": "tsx ./src/jobs/fetch_coins.ts",
     "start": "tsx ./src/index.ts",
-    "lint": "tsc --noEmit && eslint . && pnpm format",
-    "format": "prettier . --write",
-    "prepare": "husky"
+    "lint": "tsc && eslint && pnpm format",
+    "format": "prettier src/ --write"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
     "@fastify/jwt": "^9.0.3",
+    "@fastify/swagger": "^9.4.1",
+    "@fastify/swagger-ui": "^5.2.1",
     "@fastify/type-provider-typebox": "^5.1.0",
     "@fastify/websocket": "^11.0.2",
     "@prisma/client": "6.2.1",
@@ -25,13 +25,12 @@
     "fast-jwt": "^5.0.5",
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.0.1",
+    "tsx": "^4.19.2",
     "uuid": "^11.0.5",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
-    "@fastify/swagger": "^9.4.1",
-    "@fastify/swagger-ui": "^5.2.1",
     "@tsconfig/node22": "^22.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.5",
@@ -40,8 +39,6 @@
     "husky": "^9.1.7",
     "prettier": "^3.4.2",
     "prisma": "^6.2.1",
-    "prismabox": "^1.1.17",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.1"
   },

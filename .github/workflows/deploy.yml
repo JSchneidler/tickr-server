@@ -7,22 +7,43 @@ on:
     types:
       - completed
 
+env:
+  ECR_REPOSITORY: tickr # Change this to your ECR repository name
+  # ECS_SERVICE: your-service-name          # Change this to your ECS service name
+  # ECS_CLUSTER: your-cluster-name          # Change this to your ECS cluster name
+  CONTAINER_NAME: tickr # Change this to your container name
+
 jobs:
-  on-success:
+  deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success'}}
     runs-on: ubuntu-latest
-    steps:
-      - run: echo "Build passed, deploy ready."
 
-      # - uses: actions/checkout@v4
-      # - name: Install pnpm
-      #   uses: pnpm/action-setup@v4
-      #   with:
-      #     version: 10
-      # - name: Use Node.js ${{ matrix.node-version }}
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      #     cache: "pnpm"
-      # - name: Install dependencies
-      #   run: pnpm install
+    permissions:
+      contents: read
+      id-token: write # Needed for AWS OIDC authentication
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::584676595568:role/github-actions-role
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # - name: Update ECS service
+      #   run: |
+      #     aws ecs update-service --cluster $ECS_CLUSTER \
+      #                           --service $ECS_SERVICE \
+      #                           --force-new-deployment \
+      #                           --region $AWS_REGION

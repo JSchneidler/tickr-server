@@ -14,4 +14,3 @@ pnpm-debug.log*
 
 # Assets/Dependencies
 node_modules
-build

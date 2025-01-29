@@ -1,15 +1,15 @@
 {
   "extends": "@tsconfig/node22/tsconfig.json",
 
-  "include": ["**/*.ts", "**/*.js"],
-  "exclude": ["node_modules", "build"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
 
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowJs": true,
-    "checkJs": true,
-    "sourceMap": true,
-    "noUncheckedIndexedAccess": true
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "rootDir": "src/",
+    "removeComments": true
   }
 }
