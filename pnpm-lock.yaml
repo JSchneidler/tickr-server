@@ -47,6 +47,9 @@ importers:
       fastify-plugin:
         specifier: ^5.0.1
         version: 5.0.1
+      prisma:
+        specifier: ^6.2.1
+        version: 6.2.1
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -85,9 +88,6 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.4.2
-      prisma:
-        specifier: ^6.2.1
-        version: 6.2.1
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
