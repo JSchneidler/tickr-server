@@ -2,6 +2,8 @@ FROM node:22-slim
 
 RUN apt-get update -y && apt-get install -y build-essential python3 openssl
 
+ENV DATABASE_URL="file:./dev.db"
+
 WORKDIR /app
 COPY src/ ./src
 COPY package.json pnpm-lock.yaml ./

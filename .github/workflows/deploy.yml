@@ -54,7 +54,6 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            DATABASE_URL=${{vars.DATABASE_URL}}
             JWT_SECRET=${{secrets.JWT_SECRET}}
             COINGECKO_API_KEY=${{secrets.COINGECKO_API_KEY}}
             FINNHUB_API_KEY=${{secrets.FINNHUB_API_KEY}}
