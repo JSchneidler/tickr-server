@@ -6,6 +6,6 @@ WORKDIR /app
 COPY src/ ./src
 COPY package.json pnpm-lock.yaml ./
 COPY prisma/ ./prisma
-RUN npm i -g pnpm && pnpm i --frozen-lockfile --prod
+RUN npm i -g pnpm && pnpm i --frozen-lockfile --prod && pnpm db:migrate && pnpm db:fetch_coins
 
 CMD ["pnpm", "start"]
