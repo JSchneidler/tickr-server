@@ -10,4 +10,6 @@ COPY package.json pnpm-lock.yaml ./
 COPY prisma/ ./prisma
 RUN npm i -g pnpm && pnpm i --frozen-lockfile --prod && pnpm db:migrate
 
+EXPOSE 3000
+
 CMD pnpm db:fetch_coins && pnpm start
