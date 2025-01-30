@@ -23,8 +23,8 @@ jobs:
       - name: SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ vars.HOST }}
-          username: ${{ vars.USERNAME }}
+          host: 2a01:4ff:1f0:8a4a::1
+          username: root
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
