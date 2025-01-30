@@ -26,5 +26,6 @@ jobs:
           host: ${{ vars.HOST }}
           username: ${{ vars.USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
           script: |
             touch here.md
