@@ -25,6 +25,6 @@ jobs:
         with:
           host: ${{ vars.HOST }}
           username: ${{ vars.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.PRIVATE_KEY }}
           script: |
             touch here.md
