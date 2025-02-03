@@ -1,11 +1,6 @@
 name: Build
 
-on:
-  workflow_run:
-    workflows: ["Test"]
-    branches: main
-    types:
-      - completed
+on: push
 
 jobs:
   test:
@@ -35,10 +30,10 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: 5.78.89.29
-          username: ${{ vars.USERNAME}}
+          username: root
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd tickr-server
             git pull
             docker compose up --build -d
-            docker image prune -a
+            docker image prune -f
