@@ -1,4 +1,4 @@
-name: Deploy
+name: Build
 
 on:
   workflow_run:
@@ -8,9 +8,27 @@ on:
       - completed
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success'}}
+  test:
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: SSH
@@ -22,6 +40,5 @@ jobs:
           script: |
             cd tickr-server
             git pull
-            docker compose down
             docker compose up --build -d
             docker image prune -a
