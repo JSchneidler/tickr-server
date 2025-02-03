@@ -20,4 +20,7 @@ jobs:
           username: ${{ vars.USERNAME}}
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            touch here.md
+            cd tickr-server
+            docker compose down
+            docker compose up --build -d
+            docker image prune -a
