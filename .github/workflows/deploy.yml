@@ -16,11 +16,8 @@ jobs:
       - name: SSH
         uses: appleboy/ssh-action@master
         with:
-          host: 2a01:4ff:1f0:8a4a::1
+          host: 5.78.89.29
           username: ${{ vars.USERNAME}}
           key: ${{ secrets.PRIVATE_KEY }}
-          protocol: tcp6
-          port: 22
-          debug: true
           script: |
             touch here.md
