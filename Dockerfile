@@ -8,6 +8,7 @@ WORKDIR /app
 COPY src/ ./src
 COPY package.json pnpm-lock.yaml ./
 COPY prisma/ ./prisma
+COPY .env ./.env
 RUN npm i -g pnpm && pnpm i --frozen-lockfile --prod && pnpm db:migrate
 
 EXPOSE 3000

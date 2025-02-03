@@ -55,14 +55,14 @@ const start = async () => {
       origin: "http://localhost:5173", // TODO: Don't hardcode
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
-      allowedHeaders: ["Content-Type", "Authorization", "debug"],
+      allowedHeaders: ["Content-Type", "debug"],
     });
 
     await f.register(api, { prefix: "/api" });
 
     await f.ready();
 
-    const address = await f.listen({ port: 3000 });
+    const address = await f.listen({ host: "0.0.0.0", port: 3000 });
     f.log.info(`Server listening on ${address}`);
   } catch (err) {
     f.log.error(err);
