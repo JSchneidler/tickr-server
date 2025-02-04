@@ -95,7 +95,7 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
     secret: env.JWT_SECRET,
     cookie: {
       cookieName: "token",
-      signed: false,
+      signed: true,
     },
   });
   f.addHook("onRequest", async (req: FastifyRequest) => {

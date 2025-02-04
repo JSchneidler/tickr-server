@@ -12,9 +12,10 @@ export async function registerHandler(
 ) {
   const { user, token } = await createUser(req.body);
   rep.setCookie("token", token, {
-    domain: "localhost",
-    path: "/",
     httpOnly: true,
+    sameSite: true,
+    signed: true,
+    secure: "auto",
   });
   return user;
 }
@@ -26,9 +27,10 @@ export async function loginHandler(
   try {
     const { user, token } = await login(req.body.email, req.body.password);
     rep.setCookie("token", token, {
-      domain: "localhost",
-      path: "/",
       httpOnly: true,
+      sameSite: true,
+      signed: true,
+      secure: "auto",
     });
     return user;
   } catch (error) {

@@ -52,7 +52,11 @@ const start = async () => {
 
     await f.register(fastifyWebsocket);
     await f.register(fastifyCors, {
-      origin: "http://localhost:5173", // TODO: Don't hardcode
+      origin: [
+        "http://localhost:5173",
+        /^http:\/\/.*\.tickr\.jschneidler\.com$/,
+        /^https:\/\/.*\.tickr\.jschneidler\.com$/,
+      ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
       allowedHeaders: ["Content-Type", "debug"],

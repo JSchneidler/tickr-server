@@ -29,7 +29,7 @@ jobs:
       - name: SSH
         uses: appleboy/ssh-action@master
         with:
-          host: 5.78.89.29
+          host: tickr.jschneidler.com
           username: root
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
