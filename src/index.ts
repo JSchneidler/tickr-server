@@ -54,8 +54,8 @@ const start = async () => {
     await f.register(fastifyCors, {
       origin: [
         "http://localhost:5173",
-        /^http:\/\/.*\.tickr\.jschneidler\.com$/,
-        /^https:\/\/.*\.tickr\.jschneidler\.com$/,
+        /^http:\/\/.*\.?tickr\.jschneidler\.com$/,
+        /^https:\/\/.*\.?tickr\.jschneidler\.com$/,
       ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE"],
