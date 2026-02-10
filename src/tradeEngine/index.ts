@@ -116,7 +116,7 @@ class TradeEngine {
     )!;
     if (user.balance.lessThan(cost)) return;
 
-    if (!order.shares) order.shares = cost.div(price);
+    order.shares ??= cost.div(price);
 
     await this.fillOrder(order, coin, price, cost);
 
@@ -148,7 +148,7 @@ class TradeEngine {
       order.shares ? order.shares.mul(price).toDecimalPlaces(2) : order.price
     )!;
 
-    if (!order.shares) order.shares = profit.div(price);
+    order.shares ??= profit.div(price);
 
     const holding = await db.holding.findFirstOrThrow({
       where: { coinId: order.coinId },
