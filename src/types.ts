@@ -1,5 +1,5 @@
 import { Unsafe } from "@sinclair/typebox";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "./generated/prisma/client";
 
 export const Decimal = Unsafe<Prisma.Decimal>({
   type: "string",

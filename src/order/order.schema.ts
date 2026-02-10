@@ -1,4 +1,4 @@
-import { OrderDirection, OrderType, Prisma } from "@prisma/client";
+import { OrderDirection, OrderType, Prisma } from "../generated/prisma/client";
 import {
   Object as TObj,
   Number as TNum,

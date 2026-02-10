@@ -1,4 +1,10 @@
-import { Order, OrderDirection, OrderType, Prisma, Coin } from "@prisma/client";
+import {
+  Order,
+  OrderDirection,
+  OrderType,
+  Prisma,
+  Coin,
+} from "../generated/prisma/client";
 
 import db from "../db";
 import tradeFeed, { TradesSummary, UnSubFn } from "../apis/tradeFeed";

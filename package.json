@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./src/index.ts",
-    "db:migrate": "prisma db push",
+    "db:migrate": "prisma db push && prisma generate",
     "db:fetch_coins": "tsx ./src/jobs/fetch_coins.ts",
     "start": "tsx ./src/index.ts",
     "lint": "tsc && eslint && pnpm format",
@@ -19,13 +19,15 @@
     "@fastify/swagger-ui": "^5.2.1",
     "@fastify/type-provider-typebox": "^5.1.0",
     "@fastify/websocket": "^11.0.2",
-    "@prisma/client": "6.2.1",
+    "@prisma/adapter-better-sqlite3": "^7.3.0",
+    "@prisma/client": "7.3.0",
     "@sinclair/typebox": "^0.34.13",
+    "better-sqlite3": "^12.6.2",
     "dotenv": "^16.4.7",
     "fast-jwt": "^5.0.5",
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.0.1",
-    "prisma": "^6.2.1",
+    "prisma": "^7.3.0",
     "tsx": "^4.19.2",
     "uuid": "^11.0.5",
     "ws": "^8.18.0"
@@ -41,6 +43,13 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "better-sqlite3",
+      "prisma"
+    ]
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.9"

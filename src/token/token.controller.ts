@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { Role } from "@prisma/client";
+import { Role } from "../generated/prisma/client";
 
 import { createToken, getToken, getTokens, revokeToken } from "./token.service";
 import { CreateTokenRequestBody, GetTokenParams } from "./token.schema";

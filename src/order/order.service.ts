@@ -1,4 +1,4 @@
-import { OrderDirection, Prisma } from "@prisma/client";
+import { OrderDirection, Prisma } from "../generated/prisma/client";
 
 import db from "../db";
 import tradeEngine from "../tradeEngine";

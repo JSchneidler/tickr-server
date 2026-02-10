@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma/client";
 
 import env from "../env";
 import { getCoins } from "../coin/coin.service";

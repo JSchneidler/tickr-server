@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma/client";
 
 import db from "../db";
 import { UserWithoutSensitive } from "../user/user.schema";

@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Role } from "@prisma/client";
+import { Role } from "../generated/prisma/client";
 
 import { getUsers, getUser, updateUser, deleteUser } from "./user.service";
 import { GetUserParams, UpdateUserRequestBody } from "./user.schema";

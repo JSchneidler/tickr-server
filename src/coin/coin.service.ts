@@ -1,4 +1,4 @@
-import { Prisma, Coin } from "@prisma/client";
+import { Prisma, Coin } from "../generated/prisma/client";
 
 import db from "../db";
 import { CoinHistoricalDataResponse, CoinResponse } from "./coin.schema";
