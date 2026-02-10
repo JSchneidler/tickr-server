@@ -55,7 +55,7 @@ class TradeFeed {
     const connectedPromise = new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(
-          new Error("Connection to Finnhub WSS timed out after 10 seconds")
+          new Error("Connection to Finnhub WSS timed out after 10 seconds"),
         );
       }, 10000);
 
@@ -120,7 +120,7 @@ class TradeFeed {
         JSON.stringify({
           type: "subscribe",
           symbol: toSubscriptionFormat(coin.name),
-        })
+        }),
       );
   }
 
@@ -161,7 +161,7 @@ class TradeFeed {
       const listeners = this.subscriptions.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
       this.subscriptions.set(
         coin,
-        listeners.filter((l) => listener !== l)
+        listeners.filter((l) => listener !== l),
       );
 
       if (listeners.length === 0) {

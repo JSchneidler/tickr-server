@@ -8,7 +8,7 @@ import { login } from "./auth.service";
 
 export async function registerHandler(
   req: FastifyRequest<{ Body: CreateUserRequestBody }>,
-  rep: FastifyReply
+  rep: FastifyReply,
 ) {
   const { user, token } = await createUser(req.body);
   rep.setCookie("token", token, {
@@ -23,7 +23,7 @@ export async function registerHandler(
 
 export async function loginHandler(
   req: FastifyRequest<{ Body: LoginRequestBody }>,
-  rep: FastifyReply
+  rep: FastifyReply,
 ) {
   try {
     const { user, token } = await login(req.body.email, req.body.password);

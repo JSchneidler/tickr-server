@@ -23,11 +23,11 @@ declare module "fastify" {
   export interface FastifyInstance {
     authenticate: <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply
+      rep: FastifyReply,
     ) => void;
     admin: <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply
+      rep: FastifyReply,
     ) => void;
   }
 }
@@ -53,7 +53,7 @@ export async function hashPassword(password: string) {
     salt,
     310000,
     32,
-    "sha256"
+    "sha256",
   );
 
   return {
@@ -65,14 +65,14 @@ export async function hashPassword(password: string) {
 export async function comparePasswordHash(
   password: Buffer,
   salt: Buffer,
-  hash: Buffer
+  hash: Buffer,
 ) {
   const candidate_hash = await pbkdf2Async(
     Buffer.from(password),
     salt,
     310000,
     32,
-    "sha256"
+    "sha256",
   );
   return timingSafeEqual(candidate_hash, hash);
 }
@@ -107,7 +107,7 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
     "authenticate",
     async <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply
+      rep: FastifyReply,
     ) => {
       try {
         await req.jwtVerify();
@@ -116,16 +116,16 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
         f.log.error(err);
         rep.status(401).send();
       }
-    }
+    },
   );
   f.decorate(
     "admin",
     async <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply
+      rep: FastifyReply,
     ) => {
       f.authenticate(req, rep);
       if (req.user?.role !== "ADMIN") rep.status(401).send();
-    }
+    },
   );
 });
