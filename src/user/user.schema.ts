@@ -18,8 +18,10 @@ export type UserWithoutSensitive = Prisma.UserGetPayload<{
   omit: { password_hash: true; salt: true };
 }>;
 
-export interface UserCreateInput
-  extends Omit<Prisma.UserCreateInput, "password_hash" | "salt"> {
+export interface UserCreateInput extends Omit<
+  Prisma.UserCreateInput,
+  "password_hash" | "salt"
+> {
   password: string;
 }
 
