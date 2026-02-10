@@ -71,7 +71,9 @@ export async function getOHLC(coinId: string): Promise<CoinOHLC> {
 
   if (!data.length) throw Error("Failed to fetch coin OHLC");
 
-  const latest = data[data.length - 1]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  const latest = data[data.length - 1];
+
+  if (!latest) throw Error("Failed to fetch coin OHLC (empty data)");
 
   return {
     open: latest[1],

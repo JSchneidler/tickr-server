@@ -140,16 +140,7 @@ class TradeFeed {
   subscribe(coin: string, listener: TradeListener): UnSubFn {
     if (this.subscriptions.has(coin))
       this.subscriptions.get(coin)!.push(listener); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    else {
-      this.subscriptions.set(coin, [listener]);
-      // this.ws.send(
-      //   JSON.stringify({
-      //     type: "subscribe",
-      //     symbol: toSubscriptionFormat(coin),
-      //   }),
-      // );
-      // console.log(`Subscribed to ${coin}`);
-    }
+    else this.subscriptions.set(coin, [listener]);
 
     return () => {
       this.unsubscribe(coin, listener);
@@ -163,17 +154,6 @@ class TradeFeed {
         coin,
         listeners.filter((l) => listener !== l),
       );
-
-      if (listeners.length === 0) {
-        // this.ws.send(
-        //   JSON.stringify({
-        //     type: "unsubscribe",
-        //     symbol: toSubscriptionFormat(coin),
-        //   }),
-        // );
-        this.subscriptions.delete(coin);
-        // console.log(`Unsubscribed from ${coin}`);
-      }
     }
   }
 }
