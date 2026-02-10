@@ -23,11 +23,11 @@ declare module "fastify" {
   export interface FastifyInstance {
     authenticate: <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply,
+      rep: FastifyReply
     ) => void;
     admin: <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply,
+      rep: FastifyReply
     ) => void;
   }
 }
@@ -41,6 +41,7 @@ declare module "@fastify/jwt" {
 const signJwt = createSigner({
   algorithm: "HS256",
   key: async () => Promise.resolve(env.JWT_SECRET),
+  expiresIn: "7d",
 });
 
 export const pbkdf2Async = promisify(pbkdf2);
@@ -52,7 +53,7 @@ export async function hashPassword(password: string) {
     salt,
     310000,
     32,
-    "sha256",
+    "sha256"
   );
 
   return {
@@ -64,14 +65,14 @@ export async function hashPassword(password: string) {
 export async function comparePasswordHash(
   password: Buffer,
   salt: Buffer,
-  hash: Buffer,
+  hash: Buffer
 ) {
   const candidate_hash = await pbkdf2Async(
     Buffer.from(password),
     salt,
     310000,
     32,
-    "sha256",
+    "sha256"
   );
   return timingSafeEqual(candidate_hash, hash);
 }
@@ -84,10 +85,6 @@ export async function generateJwt(user: UserWithoutSensitive) {
     token,
     hash: createHash("sha256").update(token).digest(),
   };
-}
-
-export function compareJwtHash(jwt: Buffer, hash: Buffer) {
-  return timingSafeEqual(jwt, hash);
 }
 
 export default FastifyPlugin(async (f: FastifyInstance) => {
@@ -110,25 +107,25 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
     "authenticate",
     async <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply,
+      rep: FastifyReply
     ) => {
       try {
         await req.jwtVerify();
         req.user = await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
       } catch (err) {
         f.log.error(err);
-        rep.status(401).send(err);
+        rep.status(401).send();
       }
-    },
+    }
   );
   f.decorate(
     "admin",
     async <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
-      rep: FastifyReply,
+      rep: FastifyReply
     ) => {
       f.authenticate(req, rep);
       if (req.user?.role !== "ADMIN") rep.status(401).send();
-    },
+    }
   );
 });

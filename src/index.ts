@@ -10,6 +10,7 @@ import tradeFeed from "./apis/tradeFeed";
 import tradeEngine from "./tradeEngine";
 import jwtAuth from "./auth";
 import api from "./api";
+import env from "./env";
 
 const start = async () => {
   const f = fastify({ logger: true }).withTypeProvider<TypeBoxTypeProvider>();
@@ -25,16 +26,6 @@ const start = async () => {
           description: "Tickr API",
           version: "0.0.0",
         },
-        components: {
-          securitySchemes: {
-            apiKey: {
-              // TODO: Update to match JWT structure
-              type: "apiKey",
-              name: "apiKey",
-              in: "header",
-            },
-          },
-        },
       },
     });
 
@@ -47,7 +38,9 @@ const start = async () => {
       staticCSP: true,
     });
 
-    await f.register(fastifyCookie);
+    await f.register(fastifyCookie, {
+      secret: env.JWT_SECRET,
+    });
     await f.register(jwtAuth);
 
     await f.register(fastifyWebsocket);
