@@ -16,7 +16,7 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prod
+        run: pnpm install --frozen-lockfile
 
       - name: Run migrations
         run: DATABASE_URL="file:./dev.db" pnpm db:migrate
