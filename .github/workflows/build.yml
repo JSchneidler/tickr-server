@@ -19,7 +19,7 @@ jobs:
         run: pnpm install --frozen-lockfile --prod
 
       - name: Run migrations
-        run: pnpm db:migrate
+        run: DATABASE_URL="file:./dev.db" pnpm db:migrate
 
       - name: Lint
         run: pnpm lint
