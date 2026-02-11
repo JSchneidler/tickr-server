@@ -45,6 +45,8 @@ const PUBLISH_INTERVAL = 1000; // Remove interval, publish immediately somehow
 class TradeFeed {
   private ws = new WebSocket(URL);
 
+  private publishInterval: NodeJS.Timeout | undefined;
+
   private coins: CoinResponse[] = [];
   private subscriptions = new Map<string, TradeListener[]>();
   private tradesSummaries = new Map<string, TradesSummary>();
@@ -53,7 +55,8 @@ class TradeFeed {
     this.coins = await getCoins();
 
     const connectedPromise = new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
+      const timeout = setTimeout(() => { // TODO: Race condition? What if stop is called while this timeout is running?
+        this.stop();
         reject(
           new Error("Connection to Finnhub WSS timed out after 10 seconds"),
         );
@@ -95,11 +98,16 @@ class TradeFeed {
       });
     });
 
-    setInterval(() => {
+    this.publishInterval = setInterval(() => {
       void this.publish(); // TODO: Race condition? Should make sure publish finishes before publishing again
     }, PUBLISH_INTERVAL);
 
     return connectedPromise;
+  }
+
+  stop() {
+    this.ws.close();
+    clearInterval(this.publishInterval);
   }
 
   getLastPrices(): LivePrice[] {

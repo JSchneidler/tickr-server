@@ -5,6 +5,7 @@ import fastifyCors from "@fastify/cors";
 import fastifyWebsocket from "@fastify/websocket";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifyGracefulShutdown from "fastify-graceful-shutdown";
 
 import tradeFeed from "./apis/tradeFeed";
 import tradeEngine from "./tradeEngine";
@@ -17,6 +18,15 @@ const start = async () => {
   try {
     await tradeFeed.start();
     await tradeEngine.start();
+
+    await f.register(fastifyGracefulShutdown);
+
+    f.after(() => {
+      f.gracefulShutdown((signal) => {
+        f.log.info(`Shutting down: ${signal}`);
+        tradeFeed.stop();
+      });
+    });
 
     await f.register(fastifySwagger, {
       openapi: {

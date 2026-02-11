@@ -25,6 +25,7 @@
     "better-sqlite3": "^12.6.2",
     "fast-jwt": "^6.1.0",
     "fastify": "^5.7.4",
+    "fastify-graceful-shutdown": "^5.0.0",
     "fastify-plugin": "^5.1.0",
     "prisma": "^7.3.0",
     "tsx": "^4.21.0",
