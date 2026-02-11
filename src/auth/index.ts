@@ -5,8 +5,8 @@ import {
   RouteGenericInterface,
 } from "fastify";
 import FastifyPlugin from "fastify-plugin";
-import { pbkdf2, timingSafeEqual, randomBytes, createHash } from "node:crypto";
-import { promisify } from "node:util";
+import { pbkdf2, timingSafeEqual, randomBytes, createHash } from "crypto";
+import { promisify } from "util";
 import fastifyJwt, { JWT } from "@fastify/jwt";
 import { createSigner } from "fast-jwt";
 

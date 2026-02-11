@@ -45,7 +45,7 @@ const PUBLISH_INTERVAL = 1000; // Remove interval, publish immediately somehow
 class TradeFeed {
   private ws = new WebSocket(URL);
 
-  private publishInterval: NodeJS.Timeout | undefined;
+  private publishInterval: Timer | undefined;
 
   private coins: CoinResponse[] = [];
   private subscriptions = new Map<string, TradeListener[]>();

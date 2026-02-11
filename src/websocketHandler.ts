@@ -1,7 +1,6 @@
 import tradeEngine from "./tradeEngine";
 import tradeFeed from "./apis/tradeFeed";
 import { WebsocketHandler } from "@fastify/websocket";
-import { clearInterval } from "node:timers";
 
 enum WebSocketMessageType {
   ORDER_FILLED = "ORDER_FILLED",
