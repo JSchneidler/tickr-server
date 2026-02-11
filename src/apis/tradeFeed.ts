@@ -55,7 +55,8 @@ class TradeFeed {
     this.coins = await getCoins();
 
     const connectedPromise = new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => { // TODO: Race condition? What if stop is called while this timeout is running?
+      const timeout = setTimeout(() => {
+        // TODO: Race condition? What if stop is called while this timeout is running?
         this.stop();
         reject(
           new Error("Connection to Finnhub WSS timed out after 10 seconds"),
@@ -76,8 +77,9 @@ class TradeFeed {
           for (const trade of tradesMessage.data) {
             const coin = fromSubscriptionFormat(trade.s);
             const price = new Prisma.Decimal(trade.p);
-            if (this.tradesSummaries.has(coin)) {
-              const summary = this.tradesSummaries.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
+            const summary = this.tradesSummaries.get(coin);
+            if (summary) {
               summary.last = price;
               if (summary.low.greaterThan(trade.p)) summary.low = price;
               else if (summary.high.lessThan(trade.p)) summary.high = price;
@@ -112,12 +114,14 @@ class TradeFeed {
 
   getLastPrices(): LivePrice[] {
     const last = [];
-    for (const coin of this.coins)
-      if (this.tradesSummaries.has(coin.name))
+    for (const coin of this.coins) {
+      const summary = this.tradesSummaries.get(coin.name);
+      if (summary)
         last.push({
           coinId: coin.id,
-          price: this.tradesSummaries.get(coin.name)!.last.toString(), // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          price: summary.last.toString(),
         });
+    }
 
     return last;
   }
@@ -133,11 +137,10 @@ class TradeFeed {
   }
 
   private async publish() {
-    for (const [coin, summary] of this.tradesSummaries)
-      if (this.subscriptions.has(coin)) {
-        const listeners = this.subscriptions.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        for (const listener of listeners) await listener(summary);
-      }
+    for (const [coin, summary] of this.tradesSummaries) {
+      const listeners = this.subscriptions.get(coin);
+      if (listeners) for (const listener of listeners) await listener(summary);
+    }
 
     this.tradesSummaries.forEach((summary) => {
       summary.high = summary.last;
@@ -146,8 +149,9 @@ class TradeFeed {
   }
 
   subscribe(coin: string, listener: TradeListener): UnSubFn {
-    if (this.subscriptions.has(coin))
-      this.subscriptions.get(coin)!.push(listener); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const listeners = this.subscriptions.get(coin);
+
+    if (listeners) listeners.push(listener);
     else this.subscriptions.set(coin, [listener]);
 
     return () => {
@@ -156,13 +160,12 @@ class TradeFeed {
   }
 
   private unsubscribe(coin: string, listener: TradeListener) {
-    if (this.subscriptions.has(coin)) {
-      const listeners = this.subscriptions.get(coin)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const listeners = this.subscriptions.get(coin);
+    if (listeners)
       this.subscriptions.set(
         coin,
         listeners.filter((l) => listener !== l),
       );
-    }
   }
 }
 

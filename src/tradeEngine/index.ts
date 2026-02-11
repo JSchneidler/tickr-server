@@ -33,9 +33,9 @@ class TradeEngine {
   }
 
   addOrder(order: Order, coin: Coin) {
-    if (this.orders.has(coin.name)) {
-      this.orders.get(coin.name)!.orders.push(order); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    } else {
+    const subscription = this.orders.get(coin.name);
+    if (subscription) subscription.orders.push(order);
+    else {
       this.orders.set(coin.name, {
         orders: [order],
         unsubscribe: tradeFeed.subscribe(coin.name, async (summary) => {
@@ -43,14 +43,15 @@ class TradeEngine {
         }),
       });
     }
+
     // console.log(
     //   `Registered order ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}`
     // );
   }
 
   removeOrder(order: Order, coin: Coin) {
-    if (this.orders.has(coin.name)) {
-      const subscription = this.orders.get(coin.name)!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const subscription = this.orders.get(coin.name);
+    if (subscription) {
       subscription.orders = subscription.orders.filter(
         (o) => o.id !== order.id,
       );
@@ -75,8 +76,9 @@ class TradeEngine {
     //   `${this.orders.get(coin).orders.length.toString()} ${coin} orders queued`
     // );
 
-    if (this.orders.has(coin.name)) {
-      const orders = this.orders.get(coin.name)!.orders; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const subscription = this.orders.get(coin.name);
+    if (subscription) {
+      const orders = subscription.orders;
 
       await Promise.all([
         this.processMarketOrders(
@@ -105,8 +107,9 @@ class TradeEngine {
       sharePrice,
       totalPrice,
     });
-    if (this.liveUsers.has(order.userId))
-      this.liveUsers.get(order.userId)!(updatedOrder); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const user = this.liveUsers.get(order.userId);
+    if (user) user(updatedOrder);
+
     // console.log(
     //   `Filled order ${order.id.toString()}: ${order.direction}@${order.type} ${order.shares.toString()} of ${coin.name}(${sharePrice.toString()}). Total: ${totalPrice.toString()}`
     // );
