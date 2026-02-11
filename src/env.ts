@@ -1,8 +1,7 @@
-import dotenv from "dotenv";
 import { Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-dotenv.config();
+process.loadEnvFile(".env");
 
 const envSchema = Type.Object({
   COINGECKO_API_KEY: Type.String(),
