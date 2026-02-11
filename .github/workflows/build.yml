@@ -8,21 +8,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          cache: true
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Run migrations
-        run: DATABASE_URL="file:./dev.db" pnpm db:migrate
+        run: DATABASE_URL="file:./dev.db" bun db:migrate
 
       - name: Lint
-        run: pnpm lint
+        run: bun lint
 
 #  deploy:
 #    runs-on: ubuntu-latest
