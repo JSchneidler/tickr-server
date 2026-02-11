@@ -37,10 +37,10 @@ export async function createOrder(
           : new Prisma.Decimal(orderInput.shares),
       )
     )
-      throw Error("Insufficient shares in holding");
+      throw new Error("Insufficient shares in holding");
   }
 
-  // return await createOrder(order, req.user);
+  // return createOrder(order, req.user);
   const order = await db.order.create({
     data: {
       ...orderInput,
@@ -55,19 +55,19 @@ export async function createOrder(
 }
 
 export async function getOrders() {
-  return await db.order.findMany();
+  return db.order.findMany();
 }
 
 export async function getOrdersForUser(userId: number) {
-  return await db.order.findMany({ where: { userId } });
+  return db.order.findMany({ where: { userId } });
 }
 
 export async function getOrder(id: number) {
-  return await db.order.findUniqueOrThrow({ where: { id } });
+  return db.order.findUniqueOrThrow({ where: { id } });
 }
 
 export async function updateOrder(id: number, data: Prisma.OrderUpdateInput) {
-  return await db.order.update({ where: { id }, data });
+  return db.order.update({ where: { id }, data });
 }
 
 export async function deleteOrder(id: number) {

@@ -1,6 +1,7 @@
 import tradeEngine from "./tradeEngine";
 import tradeFeed from "./apis/tradeFeed";
 import { WebsocketHandler } from "@fastify/websocket";
+import { clearInterval } from "node:timers";
 
 enum WebSocketMessageType {
   ORDER_FILLED = "ORDER_FILLED",
@@ -21,7 +22,7 @@ const websocketHandler: WebsocketHandler = (socket, req) => {
     });
   } else console.log(`Guest connected: ${req.ip}`);
 
-  setInterval(() => {
+  const interval = setInterval(() => {
     socket.send(
       JSON.stringify({
         type: WebSocketMessageType.WATCH,
@@ -41,6 +42,8 @@ const websocketHandler: WebsocketHandler = (socket, req) => {
       );
       tradeEngine.removeLiveUser(req.user.id);
     } else console.log(`Guest disconnected: ${req.ip}`);
+
+    clearInterval(interval);
   });
 };
 

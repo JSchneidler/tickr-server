@@ -8,7 +8,7 @@ import {
   UserUpdateInput,
 } from "./user.schema";
 
-// TODO: Get from DB based on mode?
+// TODO: Get from DB based on mode/setting?
 const DEFAULT_BALANCE = 100000;
 
 export async function createUser(
@@ -16,7 +16,7 @@ export async function createUser(
 ): Promise<UserWithToken> {
   const { hash, salt } = await hashPassword(userInput.password);
 
-  // TODO: Make user+key creation into transaction
+  // TODO: Make user+key creation into transaction?
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...rest } = userInput;
   const user = await db.user.create({
@@ -35,11 +35,11 @@ export async function createUser(
 }
 
 export async function getUsers(): Promise<UserWithoutSensitive[]> {
-  return await db.user.findMany();
+  return db.user.findMany();
 }
 
 export async function getUser(id: number): Promise<UserWithoutSensitive> {
-  return await db.user.findUniqueOrThrow({ where: { id } });
+  return db.user.findUniqueOrThrow({ where: { id } });
 }
 
 export async function updateUser(
@@ -52,7 +52,7 @@ export async function updateUser(
     userUpdates.salt = salt;
   }
 
-  return await db.user.update({ where: { id }, data: userUpdates });
+  return db.user.update({ where: { id }, data: userUpdates });
 }
 
 export async function deleteUser(id: number): Promise<void> {

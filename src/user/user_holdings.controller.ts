@@ -18,7 +18,7 @@ export async function getUserHoldingsHandler(
   rep: FastifyReply,
 ) {
   if (req.user?.role === Role.ADMIN)
-    return await getHoldingsForUser(req.params.userId);
+    return getHoldingsForUser(req.params.userId);
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -26,8 +26,7 @@ export async function getUserHoldingHandler(
   req: FastifyRequest<{ Params: GetHoldingParams }>,
   rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN)
-    return await getHolding(req.params.holdingId);
+  if (req.user?.role === Role.ADMIN) return getHolding(req.params.holdingId);
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -39,7 +38,7 @@ export async function updateUserHoldingHandler(
   rep: FastifyReply,
 ) {
   if (req.user?.role === Role.ADMIN)
-    return await updateHolding(req.params.holdingId, req.body);
+    return updateHolding(req.params.holdingId, req.body);
   else rep.code(403).send("Insufficient permission");
 }
 

@@ -95,6 +95,7 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
       signed: true,
     },
   });
+
   f.addHook("onRequest", async (req: FastifyRequest) => {
     try {
       await req.jwtVerify();
@@ -103,19 +104,14 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
       f.log.error(err);
     }
   });
+
   f.decorate(
     "authenticate",
-    async <T extends RouteGenericInterface>(
+    <T extends RouteGenericInterface>(
       req: FastifyRequest<T>,
       rep: FastifyReply,
     ) => {
-      try {
-        await req.jwtVerify();
-        req.user = await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      } catch (err) {
-        f.log.error(err);
-        rep.status(401).send();
-      }
+      if (!req.user) rep.status(401).send();
     },
   );
   f.decorate(
@@ -125,7 +121,7 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
       rep: FastifyReply,
     ) => {
       f.authenticate(req, rep);
-      if (req.user?.role !== "ADMIN") rep.status(401).send();
+      if (req.user?.role !== "ADMIN") rep.status(403).send();
     },
   );
 });

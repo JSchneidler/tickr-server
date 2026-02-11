@@ -156,8 +156,11 @@ class TradeEngine {
 
     order.shares ??= profit.div(price);
 
-    const holding = await db.holding.findFirstOrThrow({
-      where: { coinId: order.coinId },
+    const where: Prisma.HoldingWhereUniqueInput = {
+      userId_coinId: { userId: order.userId, coinId: order.coinId },
+    };
+    const holding = await db.holding.findUniqueOrThrow({
+      where,
     });
 
     if (holding.shares.lt(order.shares)) return;

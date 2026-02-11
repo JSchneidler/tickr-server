@@ -8,7 +8,7 @@ export async function createHolding(
   user: UserWithoutSensitive,
   coinId: number,
 ) {
-  return await db.holding.create({
+  return db.holding.create({
     data: {
       ...holdingInput,
       User: { connect: { id: user.id } },
@@ -18,24 +18,24 @@ export async function createHolding(
 }
 
 export async function getHoldings() {
-  return await db.holding.findMany();
+  return db.holding.findMany();
 }
 
 export async function getHoldingsForUser(userId: number) {
-  return await db.holding.findMany({ where: { userId } });
+  return db.holding.findMany({ where: { userId } });
 }
 
 export async function getHolding(id: number) {
-  return await db.holding.findUniqueOrThrow({ where: { id } });
+  return db.holding.findUniqueOrThrow({ where: { id } });
 }
 
 export async function updateHolding(
   id: number,
   holdingUpdates: Prisma.HoldingUpdateInput,
 ) {
-  return await db.holding.update({ where: { id }, data: holdingUpdates });
+  return db.holding.update({ where: { id }, data: holdingUpdates });
 }
 
 export async function deleteHolding(id: number) {
-  return await db.holding.delete({ where: { id } });
+  return db.holding.delete({ where: { id } });
 }

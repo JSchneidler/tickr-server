@@ -12,8 +12,7 @@ export async function getUserTokensHandler(
   req: FastifyRequest<{ Params: GetUserParams }>,
   rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN)
-    return await getTokensForUser(req.params.userId);
+  if (req.user?.role === Role.ADMIN) return getTokensForUser(req.params.userId);
   else rep.code(403).send("Insufficient permission");
 }
 
@@ -21,7 +20,7 @@ export async function getUserTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
   rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN) return await getToken(req.params.tokenId);
+  if (req.user?.role === Role.ADMIN) return getToken(req.params.tokenId);
   else rep.code(403).send("Insufficient permission");
 }
 

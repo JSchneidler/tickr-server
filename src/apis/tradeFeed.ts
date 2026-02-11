@@ -43,7 +43,7 @@ const URL = `${FINNHUB_WEBSOCKET_URL}?token=${env.FINNHUB_API_KEY}`;
 const PUBLISH_INTERVAL = 1000; // Remove interval, publish immediately somehow
 
 class TradeFeed {
-  private ws = new WebSocket(URL, {});
+  private ws = new WebSocket(URL);
 
   private coins: CoinResponse[] = [];
   private subscriptions = new Map<string, TradeListener[]>();

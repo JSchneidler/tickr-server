@@ -7,13 +7,11 @@ import {
   getMyTokensHandler,
   getMyTokenHandler,
   getMyHoldingsHandler,
-  getMyHoldingHandler,
   getMyOrdersHandler,
-  getMyOrderHandler,
 } from "./me.controller";
-import { holdingResponse, holdingsResponse } from "../holding/holding.schema";
+import { holdingsResponse } from "../holding/holding.schema";
 import { tokenResponse, tokensResponse } from "../token/token.schema";
-import { orderResponse, ordersResponse } from "../order/order.schema";
+import { ordersResponse } from "../order/order.schema";
 
 export default function (f: FastifyInstance) {
   f.get(
@@ -70,19 +68,20 @@ export default function (f: FastifyInstance) {
     },
     getMyHoldingsHandler,
   );
-  f.get(
-    "/holdings/:holdingId",
-    {
-      onRequest: [f.authenticate],
-      schema: {
-        response: {
-          ...errorResponseSchemas,
-          200: holdingResponse,
-        },
-      },
-    },
-    getMyHoldingHandler,
-  );
+
+  // f.get(
+  //   "/holdings/:holdingId",
+  //   {
+  //     onRequest: [f.authenticate],
+  //     schema: {
+  //       response: {
+  //         ...errorResponseSchemas,
+  //         200: holdingResponse,
+  //       },
+  //     },
+  //   },
+  //   getMyHoldingHandler,
+  // );
 
   f.get(
     "/orders",
@@ -98,17 +97,17 @@ export default function (f: FastifyInstance) {
     getMyOrdersHandler,
   );
 
-  f.get(
-    "/orders/:orderId",
-    {
-      onRequest: [f.authenticate],
-      schema: {
-        response: {
-          ...errorResponseSchemas,
-          200: orderResponse,
-        },
-      },
-    },
-    getMyOrderHandler,
-  );
+  // f.get(
+  //   "/orders/:orderId",
+  //   {
+  //     onRequest: [f.authenticate],
+  //     schema: {
+  //       response: {
+  //         ...errorResponseSchemas,
+  //         200: orderResponse,
+  //       },
+  //     },
+  //   },
+  //   getMyOrderHandler,
+  // );
 }

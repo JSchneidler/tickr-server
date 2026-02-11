@@ -24,5 +24,5 @@ export async function login(
       user,
       token,
     };
-  } else throw Error("Invalid password");
+  } else throw new Error("Invalid password");
 }

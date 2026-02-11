@@ -58,7 +58,7 @@ export async function getPrice(coinId: string): Promise<string> {
   const response = await fetch(request);
   const price = (await response.json()) as PriceResponse;
 
-  if (!price[coinId]) throw Error("Failed to fetch coin price");
+  if (!price[coinId]) throw new Error("Failed to fetch coin price");
 
   return price[coinId].usd.toString();
 }
@@ -69,11 +69,11 @@ export async function getOHLC(coinId: string): Promise<CoinOHLC> {
 
   const data = (await response.json()) as CoinOHLCResponse;
 
-  if (!data.length) throw Error("Failed to fetch coin OHLC");
+  if (!data.length) throw new Error("Failed to fetch coin OHLC");
 
   const latest = data[data.length - 1];
 
-  if (!latest) throw Error("Failed to fetch coin OHLC (empty data)");
+  if (!latest) throw new Error("Failed to fetch coin OHLC (empty data)");
 
   return {
     open: latest[1],

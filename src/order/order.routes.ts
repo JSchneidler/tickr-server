@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { Type } from "@sinclair/typebox";
 
 import { errorResponseSchemas } from "../error_responses.schema";
 
@@ -15,6 +14,7 @@ import {
   getOrderParams,
   orderResponse,
   ordersResponse,
+  updateOrderRequestBody,
 } from "./order.schema";
 
 export default function (f: FastifyInstance) {
@@ -68,7 +68,7 @@ export default function (f: FastifyInstance) {
       onRequest: [f.authenticate],
       schema: {
         params: getOrderParams,
-        body: Type.Object({}),
+        body: updateOrderRequestBody,
         response: {
           ...errorResponseSchemas,
           200: orderResponse,

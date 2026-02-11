@@ -25,7 +25,7 @@ function calculateChangePercent(open: number, current: number) {
 export async function createCoin(
   coinInput: Prisma.CoinCreateInput,
 ): Promise<Coin> {
-  return await db.coin.create({
+  return db.coin.create({
     data: coinInput,
   });
 }
@@ -77,14 +77,14 @@ export async function getCoinHistoricalData(
 ): Promise<CoinHistoricalDataResponse> {
   const coin = await db.coin.findUniqueOrThrow({ where: { id: coinId } });
 
-  return await getHistoricalData(coin.externalId, daysAgo);
+  return getHistoricalData(coin.externalId, daysAgo);
 }
 
 export async function updateCoin(
   id: number,
   coinUpdates: Prisma.CoinUpdateInput,
 ): Promise<Coin> {
-  return await db.coin.update({ where: { id }, data: coinUpdates });
+  return db.coin.update({ where: { id }, data: coinUpdates });
 }
 
 export async function deleteCoin(id: number): Promise<void> {

@@ -21,17 +21,17 @@ export async function createToken(
 }
 
 export async function getTokens(): Promise<TokenWithoutSensitive[]> {
-  return await db.accessToken.findMany();
+  return db.accessToken.findMany();
 }
 
 export async function getTokensForUser(
   userId: number,
 ): Promise<TokenWithoutSensitive[]> {
-  return await db.accessToken.findMany({ where: { userId } });
+  return db.accessToken.findMany({ where: { userId } });
 }
 
 export async function getToken(id: number): Promise<TokenWithoutSensitive> {
-  return await db.accessToken.findUniqueOrThrow({ where: { id } });
+  return db.accessToken.findUniqueOrThrow({ where: { id } });
 }
 
 export async function revokeToken(id: number): Promise<void> {
