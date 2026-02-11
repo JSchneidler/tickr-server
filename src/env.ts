@@ -1,8 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
-process.loadEnvFile(".env");
-
 const envSchema = Type.Object({
   COINGECKO_API_KEY: Type.String(),
   FINNHUB_API_KEY: Type.String(),
