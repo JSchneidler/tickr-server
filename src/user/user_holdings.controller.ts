@@ -1,5 +1,4 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { Role } from "../generated/prisma/client";
+import { FastifyRequest } from "fastify";
 
 import {
   getHoldingsForUser,
@@ -15,19 +14,14 @@ import {
 
 export async function getUserHoldingsHandler(
   req: FastifyRequest<{ Params: GetUserParams }>,
-  rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN)
-    return getHoldingsForUser(req.params.userId);
-  else rep.code(403).send("Insufficient permission");
+  return getHoldingsForUser(req.params.userId);
 }
 
 export async function getUserHoldingHandler(
   req: FastifyRequest<{ Params: GetHoldingParams }>,
-  rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN) return getHolding(req.params.holdingId);
-  else rep.code(403).send("Insufficient permission");
+  return getHolding(req.params.holdingId);
 }
 
 export async function updateUserHoldingHandler(
@@ -35,18 +29,12 @@ export async function updateUserHoldingHandler(
     Params: GetHoldingParams;
     Body: UpdateHoldingRequestBody;
   }>,
-  rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN)
-    return updateHolding(req.params.holdingId, req.body);
-  else rep.code(403).send("Insufficient permission");
+  return updateHolding(req.params.holdingId, req.body);
 }
 
 export async function deleteUserHoldingHandler(
   req: FastifyRequest<{ Params: GetHoldingParams }>,
-  rep: FastifyReply,
 ) {
-  if (req.user?.role === Role.ADMIN) {
-    await deleteHolding(req.params.holdingId);
-  } else rep.code(403).send("Insufficient permission");
+  await deleteHolding(req.params.holdingId);
 }

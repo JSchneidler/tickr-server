@@ -19,17 +19,6 @@ declare module "fastify" {
     jwt?: JWT;
     user: UserWithoutSensitive | undefined;
   }
-
-  export interface FastifyInstance {
-    authenticate: <T extends RouteGenericInterface>(
-      req: FastifyRequest<T>,
-      rep: FastifyReply,
-    ) => void;
-    admin: <T extends RouteGenericInterface>(
-      req: FastifyRequest<T>,
-      rep: FastifyReply,
-    ) => void;
-  }
 }
 
 declare module "@fastify/jwt" {
@@ -87,6 +76,29 @@ export async function generateJwt(user: UserWithoutSensitive) {
   };
 }
 
+export function getAuthUser(req: FastifyRequest): UserWithoutSensitive {
+  if (!req.user) throw new Error("Unauthorized");
+  return req.user;
+}
+
+export function authenticate<T extends RouteGenericInterface>(
+  req: FastifyRequest<T>,
+  rep: FastifyReply,
+) {
+  if (!req.user) rep.code(401).send();
+}
+
+export function requireAdmin<T extends RouteGenericInterface>(
+  req: FastifyRequest<T>,
+  rep: FastifyReply,
+) {
+  if (!req.user) {
+    rep.code(401).send();
+    return;
+  }
+  if (req.user.role !== "ADMIN") rep.code(403).send();
+}
+
 export default FastifyPlugin(async (f: FastifyInstance) => {
   await f.register(fastifyJwt, {
     secret: env.JWT_SECRET,
@@ -99,29 +111,9 @@ export default FastifyPlugin(async (f: FastifyInstance) => {
   f.addHook("onRequest", async (req: FastifyRequest) => {
     try {
       await req.jwtVerify();
-      req.user = await getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      if (req.user) req.user = await getUser(req.user.id);
     } catch (err) {
       f.log.error(err);
     }
   });
-
-  f.decorate(
-    "authenticate",
-    <T extends RouteGenericInterface>(
-      req: FastifyRequest<T>,
-      rep: FastifyReply,
-    ) => {
-      if (!req.user) rep.status(401).send();
-    },
-  );
-  f.decorate(
-    "admin",
-    async <T extends RouteGenericInterface>(
-      req: FastifyRequest<T>,
-      rep: FastifyReply,
-    ) => {
-      f.authenticate(req, rep);
-      if (req.user?.role !== "ADMIN") rep.status(403).send();
-    },
-  );
 });

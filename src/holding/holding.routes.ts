@@ -7,12 +7,13 @@ import {
   holdingResponse,
   holdingsResponse,
 } from "./holding.schema";
+import { requireAdmin } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -26,7 +27,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:holdingId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getHoldingParams,
         response: {

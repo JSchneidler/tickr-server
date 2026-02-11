@@ -13,12 +13,13 @@ import {
   getUserOrdersHandler,
   updateUserOrderHandler,
 } from "./user_order.controller";
+import { requireAdmin } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -32,7 +33,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:orderId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getOrderParams,
         response: {
@@ -47,7 +48,7 @@ export default function (f: FastifyInstance) {
   f.patch(
     "/:orderId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getOrderParams,
         body: updateOrderRequestBody,
@@ -63,7 +64,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:orderId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getOrderParams,
         response: {

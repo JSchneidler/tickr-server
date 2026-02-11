@@ -11,12 +11,13 @@ import {
   getUserTokensHandler,
   revokeUserTokenHandler,
 } from "./user_token.controller";
+import { requireAdmin } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -30,7 +31,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:tokenId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getTokenParams,
         response: {
@@ -45,7 +46,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:tokenId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getTokenParams,
         response: {

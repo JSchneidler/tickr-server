@@ -8,6 +8,7 @@ import {
 } from "./auth.controller";
 import { createUserRequestBody, userResponse } from "../user/user.schema";
 import { loginRequestBody } from "./auth.schema";
+import { authenticate } from ".";
 
 export default function (f: FastifyInstance) {
   f.post(
@@ -41,7 +42,7 @@ export default function (f: FastifyInstance) {
   f.post(
     "/logout",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,

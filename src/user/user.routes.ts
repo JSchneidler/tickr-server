@@ -17,6 +17,7 @@ import {
   usersResponse,
   userResponse,
 } from "./user.schema";
+import { requireAdmin } from "../auth";
 
 export default async function (f: FastifyInstance) {
   await f.register(tokenRoutes, { prefix: "/token" });
@@ -26,7 +27,7 @@ export default async function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -40,7 +41,7 @@ export default async function (f: FastifyInstance) {
   f.get(
     "/:userId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getUserParams,
         response: {
@@ -55,7 +56,7 @@ export default async function (f: FastifyInstance) {
   f.patch(
     "/:userId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getUserParams,
         body: updateUserRequestBody,
@@ -71,7 +72,7 @@ export default async function (f: FastifyInstance) {
   f.delete(
     "/:userId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getUserParams,
         response: {

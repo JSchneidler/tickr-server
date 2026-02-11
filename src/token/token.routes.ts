@@ -14,12 +14,13 @@ import {
   tokenResponse,
   tokensResponse,
 } from "./token.schema";
+import { authenticate, requireAdmin } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.post(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         body: createTokenRequestBody,
         response: {
@@ -34,7 +35,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -48,7 +49,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:tokenId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getTokenParams,
         response: {
@@ -63,7 +64,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:tokenId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         params: getTokenParams,
         response: {

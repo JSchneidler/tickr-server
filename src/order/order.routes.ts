@@ -16,12 +16,13 @@ import {
   ordersResponse,
   updateOrderRequestBody,
 } from "./order.schema";
+import { authenticate, requireAdmin } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.post(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         body: createOrderRequestBody,
         response: {
@@ -36,7 +37,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -50,7 +51,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/:orderId",
     {
-      onRequest: [f.admin],
+      onRequest: [requireAdmin],
       schema: {
         params: getOrderParams,
         response: {
@@ -65,7 +66,7 @@ export default function (f: FastifyInstance) {
   f.patch(
     "/:orderId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         params: getOrderParams,
         body: updateOrderRequestBody,
@@ -81,7 +82,7 @@ export default function (f: FastifyInstance) {
   f.delete(
     "/:orderId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         params: getOrderParams,
         response: {

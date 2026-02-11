@@ -5,13 +5,14 @@ import { getTokensForUser, getToken } from "../token/token.service";
 import { GetTokenParams } from "../token/token.schema";
 import { getHoldingsForUser } from "../holding/holding.service";
 import { getOrdersForUser } from "../order/order.service";
+import { getAuthUser } from "../auth";
 
 export async function getMeHandler(req: FastifyRequest) {
-  return getUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return getUser(getAuthUser(req).id);
 }
 
 export async function getMyTokensHandler(req: FastifyRequest) {
-  return getTokensForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return getTokensForUser(getAuthUser(req).id);
 }
 export async function getMyTokenHandler(
   req: FastifyRequest<{ Params: GetTokenParams }>,
@@ -20,21 +21,21 @@ export async function getMyTokenHandler(
 }
 
 export async function getMyHoldingsHandler(req: FastifyRequest) {
-  return getHoldingsForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return getHoldingsForUser(getAuthUser(req).id);
 }
 // TODO: Do we need this? If so, bug. getHolding takes holdingId, not userId
 // export async function getMyHoldingHandler(
 //   req: FastifyRequest<{ Params: GetHoldingParams }>,
 // ) {
-//   return getHolding(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+//   return getHolding(getAuthUser(req).id);
 // }
 
 export async function getMyOrdersHandler(req: FastifyRequest) {
-  return getOrdersForUser(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return getOrdersForUser(getAuthUser(req).id);
 }
 // TODO: Do we need this? If so, bug. getHolding takes holdingId, not userId
 // export async function getMyOrderHandler(
 //   req: FastifyRequest<{ Params: GetOrderParams }>,
 // ) {
-//   return getOrder(req.user!.id); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+//   return getOrder(getAuthUser(req).id);
 // }

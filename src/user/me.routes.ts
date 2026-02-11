@@ -12,12 +12,13 @@ import {
 import { holdingsResponse } from "../holding/holding.schema";
 import { tokenResponse, tokensResponse } from "../token/token.schema";
 import { ordersResponse } from "../order/order.schema";
+import { authenticate } from "../auth";
 
 export default function (f: FastifyInstance) {
   f.get(
     "/",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -31,7 +32,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/tokens",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -44,7 +45,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/tokens/:tokenId",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -58,7 +59,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/holdings",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -72,7 +73,7 @@ export default function (f: FastifyInstance) {
   // f.get(
   //   "/holdings/:holdingId",
   //   {
-  //     onRequest: [f.authenticate],
+  //     preHandler: [authenticate],
   //     schema: {
   //       response: {
   //         ...errorResponseSchemas,
@@ -86,7 +87,7 @@ export default function (f: FastifyInstance) {
   f.get(
     "/orders",
     {
-      onRequest: [f.authenticate],
+      onRequest: [authenticate],
       schema: {
         response: {
           ...errorResponseSchemas,
@@ -100,7 +101,7 @@ export default function (f: FastifyInstance) {
   // f.get(
   //   "/orders/:orderId",
   //   {
-  //     onRequest: [f.authenticate],
+  //     preHandler: [authenticate],
   //     schema: {
   //       response: {
   //         ...errorResponseSchemas,

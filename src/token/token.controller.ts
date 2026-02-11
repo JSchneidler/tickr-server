@@ -2,11 +2,12 @@ import { FastifyRequest } from "fastify";
 
 import { createToken, getToken, getTokens, revokeToken } from "./token.service";
 import { CreateTokenRequestBody, GetTokenParams } from "./token.schema";
+import { getAuthUser } from "../auth";
 
 export async function createTokenHandler(
   req: FastifyRequest<{ Body: CreateTokenRequestBody }>,
 ) {
-  return createToken(req.body.name, req.user!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  return createToken(req.body.name, getAuthUser(req));
 }
 
 export async function getTokensHandler() {
